@@ -33,20 +33,11 @@ Bool:
 
 // Intents----------------------------------------------------------------------------------------------------------------
 Intent:
-	{Intent} 'Intent' '{'values+=IntentValue*'}'
+	{Intent} 'Intent' name=ID '{'values+=IntentValue*'}'
 ;
 
 IntentValue:
-    va=IntentRequired | va=IntentOptional
-;
-
-IntentRequired:
-	req=IntentDisplayNameRequired
-;
-
-
-IntentDisplayNameRequired:
-	v='displayName' ':' name=ID
+    iv=IntentOptional
 ;
 
 IntentOptional:
@@ -54,7 +45,7 @@ IntentOptional:
 ;
 
 KeyValue:
-	'action' ':' name=ID
+	v='action' ':' name=ID
 ;
 
 List:
@@ -62,7 +53,7 @@ List:
 ;
 
 TrainingPhrases:
-	'trainingPhrases' '{' phrases+=Phrase+'}'
+	v='trainingPhrases' '{' phrases+=Phrase+'}'
 ;
 
 Phrase:
@@ -78,7 +69,7 @@ Words:
 ;
 
 Parameters:
-	{Parameters} 'parameters' '{'parameters+=Parameter*'}'
+	{Parameters} v='parameters' '{'parameters+=Parameter*'}'
 ;
 
 Parameter:
