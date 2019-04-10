@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<?eclipse version="3.0"?>
+<plugin>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package 
+			uri = "http://www.sdu.dk/mdsd/lasr_lang"
+			class = "dk.sdu.mdsd.lasr_lang.Lasr_langPackage"
+			genModel = "model/generated/Lasr_lang.genmodel" />
+	</extension>
+</plugin>

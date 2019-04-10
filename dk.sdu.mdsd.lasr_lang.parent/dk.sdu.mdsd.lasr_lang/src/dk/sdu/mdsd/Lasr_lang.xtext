@@ -1,0 +1,108 @@
+grammar dk.sdu.mdsd.Lasr_lang with org.eclipse.xtext.common.Terminals
+
+generate lasr_lang "http://www.sdu.dk/mdsd/lasr_lang"
+
+Model:
+	agent=Agent intents+=Intent* entitytypes+=EntityType*
+;
+
+Agent:
+	{Agent} 'Agent' '{'values+=AgentValue*'}'
+;
+
+AgentValue:
+	aa=AgentAttribute ':' value=Value
+;
+
+AgentAttribute:
+	('parent' | 'displayName' | 'defaultLanguageCode' | 'timezone' | 'enableLogging')  
+;
+
+Value:
+	v=ValueName | bool=Bool
+;
+
+ValueName:
+	name=ID 
+;
+
+Bool:
+	'true' | 'false'
+;
+
+
+// Intents----------------------------------------------------------------------------------------------------------------
+Intent:
+	{Intent} 'Intent' '{'values+=IntentValue*'}'
+;
+
+IntentValue:
+    va=IntentRequired | va=IntentOptional
+;
+
+IntentRequired:
+	req=IntentDisplayNameRequired
+;
+
+
+IntentDisplayNameRequired:
+	v='displayName' ':' name=ID
+;
+
+IntentOptional:
+	KeyValue | List
+;
+
+KeyValue:
+	'action' ':' name=ID
+;
+
+List:
+	TrainingPhrases | Parameters
+;
+
+TrainingPhrases:
+	'trainingPhrases' '{' phrases+=Phrase+'}'
+;
+
+Phrase:
+	'phrase' ':' sentences+=Sentence(',' sentences+=Sentence)*
+;
+
+Sentence:
+	{Sentence} (words+=Words)+ ('('entity=ID')')?
+;
+
+Words:
+	name = STRING
+;
+
+Parameters:
+	{Parameters} 'parameters' '{'parameters+=Parameter*'}'
+;
+
+Parameter:
+	req=('required')? 'parameter' name=ID '{' 'entityType' ':' type=ID  prompts+=Prompt* '}'
+;
+
+Prompt:
+	{Prompt} ('prompt' ':' (words+=Words(',' words+=Words)*)+)
+;
+
+
+// EntityType ---------------------------------------------------------------------------------------------------------------------
+EntityType:
+	'EntityType' name=ID '{' a='autoExpansition' ':' exp=('true'|'false') entities+=Entities+ '}'	
+;
+
+Entities:
+	'entities' '{' entity+=Entity+ '}'
+;
+
+Entity:
+	'entity' '{' 'value' ':' value=ID 'synonym' ':' syn+=Synonym(',' syn+=Synonym)* '}'
+;
+
+Synonym:
+	syn=ID
+;
