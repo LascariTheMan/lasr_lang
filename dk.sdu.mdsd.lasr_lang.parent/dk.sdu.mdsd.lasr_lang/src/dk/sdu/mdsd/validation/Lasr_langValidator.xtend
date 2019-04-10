@@ -58,21 +58,14 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	@Check
 	def checkIfAgentParamsAreAllowed(AgentValue agentVal) {
-		if(agentVal.value.bool == 'true' || agentVal.value.bool == 'false') {
-			checkAgentParams(agentVal)
-		}
+		checkAgentParams(agentVal)
 	}
 	
 	@Check
-	def checkAgentMultipleSameParams(AgentValue agentVal) {
-		checkAgentMultipleParams(agentVal)
-	}
-
-	@Check
 	def ifRequiredParameterThenPrompts(Parameter param){
 		if(param.req == "required" && param.prompts.isEmpty()) {
-			error("You must create at least one prompt if the parameter is: "+ param.req.toString(),
-				lit.getParameter_Req,
+			error("You must create at least one prompt if the parameter is "+ param.req.toString(),
+				null,
 				IF_REQUIRED_PARAM_THEN_PROMPT)
 		}
 	}
@@ -101,11 +94,6 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 	}
 	
-	/* @Check
-	def checkIntentDisplayNameIsNotNull(Intent i) {
-		checkIntentParams(i);
-	}*/
-	
 	@Check
 	def checkIntentHasOnlyOneOfEachParam(Intent intent) {
 		val intentValSet = newHashSet
@@ -127,59 +115,35 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	}
 	
 	def checkAgentParams(AgentValue agentVal) {
-		if(agentVal.aa == "parent" && (agentVal.value.bool == 'true' || agentVal.value.bool == 'false')) {
-			error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' +agentVal.value.bool, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_PARENT)
+		val bool = agentVal.value.bool
+		if(agentVal.value.bool == 'true' || agentVal.value.bool == 'false') {
+			if(agentVal.aa == "parent") {
+				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
+					lit.getAgentValue_Value,
+					TYPEMISMATCH_AGENT_PARENT)
+			}
+			if(agentVal.aa == "displayName") {
+				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
+					lit.getAgentValue_Value,
+					TYPEMISMATCH_AGENT_DISPLAYNAME)
+			}
+			if(agentVal.aa == "defaultLanguageCode") {
+				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
+					lit.getAgentValue_Value,
+					TYPEMISMATCH_AGENT_DEFAULTLANGUAGECODE)
+			}
+			if(agentVal.aa == "timezone") {
+				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
+					lit.getAgentValue_Value,
+					TYPEMISMATCH_AGENT_TIMEZONE)
+			}
+			if(agentVal.aa == "enableLogging" && (agentVal.value.v.name !== 'true' || agentVal.value.v.name !== 'false')) {
+				error('Type mismatch:  '+ agentVal.aa + ' cannot be set to ' +agentVal.value.v.name.class.typeName, 
+					lit.getAgentValue_Value,
+					TYPEMISMATCH_AGENT_ENABLELOGGING)
+			}	
 		}
-		if(agentVal.aa == "displayName" && (agentVal.value.bool == 'true' || agentVal.value.bool == 'false')) {
-			error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' +agentVal.value.bool, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_DISPLAYNAME)
-		}
-		if(agentVal.aa == "defaultLanguageCode" && (agentVal.value.bool == 'true' || agentVal.value.bool == 'false')) {
-			error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' +agentVal.value.bool, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_DEFAULTLANGUAGECODE)
-		}
-		if(agentVal.aa == "timezone" && (agentVal.value.bool == 'true' || agentVal.value.bool == 'false')) {
-			error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' +agentVal.value.bool, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_TIMEZONE)
-		}
-		if(agentVal.aa == "enableLogging" && (agentVal.value.v.name !== 'true' || agentVal.value.v.name !== 'false')) {
-			error('Type mismatch:  '+ agentVal.aa + ' cannot be set to ' +agentVal.value.v.name.class.typeName, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_ENABLELOGGING)
-		}
-	}
-	
-	def checkAgentMultipleParams(AgentValue agentVal) {
-		if(agentVal.aa == "parent" && (agentVal.value.bool == 'true' || agentVal.value.bool == 'false')) {
-			error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' +agentVal.value.bool, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_PARENT)
-		}
-		if(agentVal.aa == "displayName" && (agentVal.value.bool == 'true' || agentVal.value.bool == 'false')) {
-			error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' +agentVal.value.bool, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_DISPLAYNAME)
-		}
-		if(agentVal.aa == "defaultLanguageCode" && (agentVal.value.bool == 'true' || agentVal.value.bool == 'false')) {
-			error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' +agentVal.value.bool, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_DEFAULTLANGUAGECODE)
-		}
-		if(agentVal.aa == "timezone" && (agentVal.value.bool == 'true' || agentVal.value.bool == 'false')) {
-			error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' +agentVal.value.bool, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_TIMEZONE)
-		}
-		if(agentVal.aa == "enableLogging" && (agentVal.value.v.name !== 'true' || agentVal.value.v.name !== 'false')) {
-			error('Type mismatch:  '+ agentVal.aa + ' cannot be set to ' +agentVal.value.v.name.class.typeName, 
-				lit.getAgentValue_Value,
-				TYPEMISMATCH_AGENT_ENABLELOGGING)
-		}
+		
 	}
 	
 	def checkAgentParams(Agent agent) {
@@ -189,24 +153,24 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 		
 		if (!agentValues.contains('parent')) {
-		error('You must define the parent variable', 
-				lit.getAgent_Values,
-				MISSING_AGENT_PARENT)
+			error('You must define the parent variable', 
+					null,
+					MISSING_AGENT_PARENT)
 		} else if (!agentValues.contains('displayName')) {
 			error('You must define the displayName variable', 
-					lit.getAgent_Values,
+					null,
 					MISSING_AGENT_DISPLAYNAME)
 		} else if (!agentValues.contains('defaultLanguageCode')) {
 			error('You must define the defaultLanguageCode variable', 
-					lit.getAgent_Values,
+					null,
 					MISSING_AGENT_DEFAULTLANGUAGECODE)
 		} else if (!agentValues.contains('timezone')) {
 			error('You must define the timezone variable', 
-					lit.getAgent_Values,
+					null,
 					MISSING_AGENT_TIMEZONE)
 		} else if (!agentValues.contains('enableLogging')) {
 			error('You must define the enableLogging variable', 
-					lit.getAgent_Values,
+					null,
 					MISSING_AGENT_ENABLELOGGING)
 		}
 	}
