@@ -10,11 +10,16 @@ import dk.sdu.mdsd.lasr_lang.Agent
 import dk.sdu.mdsd.lasr_lang.AgentValue
 import dk.sdu.mdsd.lasr_lang.ValueName
 import dk.sdu.mdsd.lasr_lang.Intent
+import dk.sdu.mdsd.lasr_lang.KeyValue
+import dk.sdu.mdsd.lasr_lang.List
+import dk.sdu.mdsd.lasr_lang.TrainingPhrases
+import dk.sdu.mdsd.lasr_lang.Parameters
 import dk.sdu.mdsd.lasr_lang.EntityType
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.GsonBuilder
 import com.google.gson.FieldNamingPolicy
+import dk.sdu.mdsd.lasr_lang.IntentOptional
 
 /**
  * Generates code from your model files on save.
@@ -25,10 +30,13 @@ class Lasr_langGenerator extends AbstractGenerator {
 	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create()
-		val obj = new JsonObject
-		resource.allContents.filter(Agent).forEach[generateAgentJSON(obj)]
-		println(gson.toJson(obj))
-		//resource.allContents.filter(Intent).forEach[generateIntentJSON]
+		val agentJSON = new JsonObject
+		val intentJSON = new JsonObject
+		
+		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
+		resource.allContents.filter(Intent).forEach[generateIntentJSON(intentJSON)]
+		println(gson.toJson(agentJSON))
+		
 		//resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON]
 	}
 	 
@@ -48,8 +56,27 @@ class Lasr_langGenerator extends AbstractGenerator {
 		}
 	}
 	
-	def generateIntentJSON() {
-		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+	def generateIntentJSON(Intent intent, JsonObject obj) {
+		var key = new String()
+		var value = new Object()
+		
+		for (i : intent.values) {
+			val raw_value = i.iv
+			if (raw_value instanceof KeyValue) {
+				key = raw_value.v 
+				value = (raw_value as KeyValue).name
+			} else if (raw_value instanceof List) {
+				generateList(intent, obj, raw_value)			
+			}
+		}
+	}
+	
+	def generateList(Intent intent, JsonObject obj, IntentOptional raw_value) {
+		if (raw_value instanceof TrainingPhrases) {
+			
+		} else if (raw_value instanceof Parameters) {
+			
+		}
 	}
 	
 	def generateEntityTypeJSON() {
