@@ -13,6 +13,10 @@ import dk.sdu.mdsd.lasr_lang.Prompt
 import dk.sdu.mdsd.lasr_lang.Sentence
 import dk.sdu.mdsd.lasr_lang.Words
 import org.eclipse.xtext.validation.Check
+import dk.sdu.mdsd.lasr_lang.TrainingPhrases
+import dk.sdu.mdsd.lasr_lang.List
+import dk.sdu.mdsd.lasr_lang.Parameters
+import dk.sdu.mdsd.lasr_lang.Phrase
 
 /**
  * This class contains custom validation rules. 
@@ -38,6 +42,9 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	public static val PHRASE_STRING_SHOULD_NOT_BE_EMPTY = 'phraseStringShouldNotBeEmpty'
 	public static val MISSING_INTENT_DISPLAYNAME = 'missingIntentDisplayName'
 	public static val DUPLICATE_ENTRY = 'duplicateEntryError'
+	public static val IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED = 'missingPhrasesWhenTrainingPhrasesFieldisDef'
+	public static val IF_TRAINING_PHRASES_ARE_ABSENT = 'absentTrainingPhrasesDefintion'
+	
 	public val lit = Lasr_langPackage.eINSTANCE
 	// MIssing validation:
 	// Agent and Intent: validate that only 1 of each parameter has been written.
@@ -53,7 +60,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
         warning('Agent attributes should start with a capital', av.value.v, 
                 lit.getValueName_Name,
                 INVALID_NAME)
-    }
+    	}
 	}
 	
 	@Check
@@ -71,6 +78,13 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	}
 	
 	@Check
+	def ifTrainingPhrasesDefinedThenPhrasesMustBeDefined(TrainingPhrases tp) {
+		if(tp.v !== null && tp.phrases.isEmpty()) {
+			error("You must create at least one phrase", null, IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED)
+		}
+	}
+	
+	@Check
 	def promptStringShouldNotBeEmpty(Prompt p) {
 		for(Words w : p.words) {			
 			if("".equals(w.name)) {
@@ -82,6 +96,39 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 	}
 	
+	@Check
+	def ifTrainingPhrasesAreAbsent(Intent i) {
+		val iVals = newArrayList
+		for(var j = 0 ; j < i.values.length ; j++) {
+			iVals.add(i.values.get(j).iv.v)
+		}
+		if(!iVals.contains('trainingPhrases')) {
+			warning("This intent won't know much without a few training phrases", lit.getIntent_Name, IF_TRAINING_PHRASES_ARE_ABSENT)
+		}
+	}
+	/*
+	@Check
+	def ifEntityIsDefinedInPhraseThenDefineInParameter(List l) {
+		val pVals = newArrayList
+		if(l instanceof Parameters) {
+			for(var j = 0 ; j < l.parameters.length ; j++) {
+				pVals.add(l.parameters.get(j).name)
+				//println(l.parameters.get(j).name)
+			}
+		}
+		if(l instanceof TrainingPhrases) {
+			System.out.println("Hej jeg er en phrase")
+			var i = 0
+			for(Phrase p : l.phrases) {
+				println(p.sentences.get(i).entity)
+				/*if(!pVals.contains(p.sentences.get(i).entity)) {
+					error("You must define the parameter in the parameters clause", lit.getTrainingPhrases_Phrases, "")
+				}
+				i++
+			}
+		}
+	}
+	 */
 	@Check
 	def phraseStringShouldNotBeEmpty(Sentence s) {
 		for(Words w : s.words) {			
