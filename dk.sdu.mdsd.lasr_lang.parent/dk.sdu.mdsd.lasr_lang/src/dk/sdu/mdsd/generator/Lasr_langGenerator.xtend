@@ -20,6 +20,8 @@ import com.google.gson.JsonObject
 import com.google.gson.GsonBuilder
 import com.google.gson.FieldNamingPolicy
 import dk.sdu.mdsd.lasr_lang.IntentOptional
+import com.google.gson.JsonArray
+import java.lang.reflect.Parameter
 
 /**
  * Generates code from your model files on save.
@@ -36,6 +38,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
 		resource.allContents.filter(Intent).forEach[generateIntentJSON(intentJSON)]
 		println(gson.toJson(agentJSON))
+		println(gson.toJson(intentJSON))
 		
 		//resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON]
 	}
@@ -59,24 +62,83 @@ class Lasr_langGenerator extends AbstractGenerator {
 	def generateIntentJSON(Intent intent, JsonObject obj) {
 		var key = new String()
 		var value = new Object()
-		
+		obj.addProperty("displayName", intent.name)
 		for (i : intent.values) {
 			val raw_value = i.iv
 			if (raw_value instanceof KeyValue) {
 				key = raw_value.v 
-				value = (raw_value as KeyValue).name
-			} else if (raw_value instanceof List) {
-				generateList(intent, obj, raw_value)			
+				value = raw_value.name
+				obj.addProperty(key, value.toString)
+			} else if (raw_value instanceof TrainingPhrases) {
+				generateTrainingPhrases(intent, obj, raw_value)			
+			} else if (raw_value instanceof Parameters) {
+				generateParameters(intent, obj, raw_value)
 			}
 		}
 	}
 	
-	def generateList(Intent intent, JsonObject obj, IntentOptional raw_value) {
-		if (raw_value instanceof TrainingPhrases) {
-			
-		} else if (raw_value instanceof Parameters) {
-			
+	def generateTrainingPhrases(Intent intent, JsonObject obj, TrainingPhrases raw_value) {
+		val key = "trainingPhrases"
+		val values = new JsonArray
+		for (phrase : raw_value.phrases) {
+			val entry_phrase = new JsonObject
+			val parts_key = "parts"
+			val parts = new JsonArray
+			for (part : phrase.sentences) {
+				val json_part = new JsonObject
+				val part_text_key = "text"
+				var part_text_value = new String()
+				if (part.entity != null) {
+					val entity_type_value = checkTypes(part.entity)
+					json_part.addProperty("entityType", entity_type_value)
+					json_part.addProperty("alias", part.entity)
+				}
+				for (word : part.words) {
+					part_text_value = word.name
+				}
+				json_part.addProperty(part_text_key, part_text_value)
+				parts.add(json_part)
+			}
+			entry_phrase.add(parts_key, parts)
+			values.add(entry_phrase)
 		}
+		obj.add(key, values)
+	} 
+	
+	def String checkTypes(String entity) {
+		if (entity.equals("givenName")) {
+			return "@sys.given-name"
+		} if (entity.equals("timePeriod")) {
+			return "@sys.time-period"
+		} if (entity.equals("date")) {
+			return "@sys.date"
+		}
+		return entity
+	}
+	
+	def generateParameters(Intent intent, JsonObject obj, Parameters raw_value) {
+		val key = raw_value.v
+		val values = new JsonArray
+		for (parameter : raw_value.parameters) {
+			val parameter_json = new JsonObject
+			if (parameter.req != null) {
+				parameter_json.addProperty("mandatory", true)	
+			} else {
+				parameter_json.addProperty("mandatory", false)
+			}
+			parameter_json.addProperty("displayName", parameter.name)
+			parameter_json.addProperty("entityTypeDisplayName", checkTypes(parameter.type))
+			val prompt_key = "prompts"
+			val prompt_values = new JsonArray
+			for (prompt : parameter.prompts) {
+				for (word : prompt.words) {
+					prompt_values.add(word.name)
+				}
+			}
+			parameter_json.add(prompt_key, prompt_values)
+			values.add(parameter_json)
+		}
+		obj.add(key, values)
 	}
 	
 	def generateEntityTypeJSON() {
