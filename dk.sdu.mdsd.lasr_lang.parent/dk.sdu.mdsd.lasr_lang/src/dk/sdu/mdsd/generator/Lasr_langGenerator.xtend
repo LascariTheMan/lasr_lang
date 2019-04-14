@@ -32,6 +32,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create()
+		val httpRequest = new HttpRequest
 		val agentJSON = new JsonObject
 		val intentJSON = new JsonObject
 		
@@ -40,6 +41,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		println(gson.toJson(agentJSON))
 		println(gson.toJson(intentJSON))
 		
+		httpRequest.createIntent(intentJSON, gson)
 		//resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON]
 	}
 	 
