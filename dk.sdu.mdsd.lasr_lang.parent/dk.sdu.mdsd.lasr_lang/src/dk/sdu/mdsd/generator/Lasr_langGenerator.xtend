@@ -17,6 +17,8 @@ import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
 import dk.sdu.mdsd.lasr_lang.EntityType
+import java.util.ArrayList
+import com.google.gson.Gson
 
 /**
  * Generates code from your model files on save.
@@ -25,26 +27,45 @@ import dk.sdu.mdsd.lasr_lang.EntityType
  */
 class Lasr_langGenerator extends AbstractGenerator {
 	
+	val httpRequest = new HttpRequest
+	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create()
-		val httpRequest = new HttpRequest
+		
+		val intents = new ArrayList<JsonObject>()
+		val entityTypes = new ArrayList<JsonObject>()
 		val agentJSON = new JsonObject
-		val intentJSON = new JsonObject
-		val entityTypeJSON = new JsonObject
 		val apikeyManager = new ApiKeyManager
 		
 		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
-		resource.allContents.filter(Intent).forEach[generateIntentJSON(intentJSON)]
-		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypeJSON)]
+		resource.allContents.filter(Intent).forEach[generateIntentJSON(intents)]
+		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypes)]
 		
 		println(gson.toJson(agentJSON))
-		println(gson.toJson(intentJSON))
-		println(gson.toJson(entityTypeJSON))
+		printIntentsAndEntityTypes(intents, entityTypes, gson)
+		
 		
 		httpRequest.updateKey(apikeyManager.key)
 		httpRequest.reset()
-		httpRequest.createIntent(intentJSON, gson)
-		httpRequest.createEntityTypes(entityTypeJSON, gson)
+		createIntentsAndEntityTypes(intents, entityTypes, gson)
+	}
+	
+	def printIntentsAndEntityTypes(ArrayList<JsonObject> intents, ArrayList<JsonObject> entityTypes, Gson gson) {
+		for (intent : intents) {
+			println(gson.toJson(intent))	
+		}
+		for (entityType : entityTypes) {
+			println(gson.toJson(entityType))	
+		}
+	}
+	
+	def createIntentsAndEntityTypes(ArrayList<JsonObject> intents, ArrayList<JsonObject> entityTypes, Gson gson) {
+		for (intent : intents) {
+			httpRequest.createIntent(intent, gson)
+		}
+		for (entityType : entityTypes) {
+			httpRequest.createEntityTypes(entityType, gson)	
+		}
 	}
 	 
 	def generateAgentJSON(Agent agent, JsonObject obj) {
@@ -63,7 +84,8 @@ class Lasr_langGenerator extends AbstractGenerator {
 		}
 	}
 	
-	def generateIntentJSON(Intent intent, JsonObject obj) {
+	def generateIntentJSON(Intent intent, ArrayList<JsonObject> intents) {
+		val obj = new JsonObject
 		var key = new String()
 		var value = new Object()
 		obj.addProperty("displayName", intent.name)
@@ -79,6 +101,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 				generateParameters(intent, obj, raw_value)
 			}
 		}
+		intents.add(obj)
 	}
 	
 	def generateTrainingPhrases(Intent intent, JsonObject obj, TrainingPhrases raw_value) {
@@ -145,7 +168,8 @@ class Lasr_langGenerator extends AbstractGenerator {
 		obj.add(key, values)
 	}
 	
-	def generateEntityTypeJSON(EntityType entityType, JsonObject obj) {
+	def generateEntityTypeJSON(EntityType entityType, ArrayList<JsonObject> entityTypes) {
+		val obj = new JsonObject
 		obj.addProperty("displayName", entityType.name)
 		obj.addProperty("kind", "KIND_MAP")
 		if (entityType.exp == "true") {
@@ -169,5 +193,6 @@ class Lasr_langGenerator extends AbstractGenerator {
 			}
 		}
 		obj.add(key, value)
+		entityTypes.add(obj)
 	}
 }
