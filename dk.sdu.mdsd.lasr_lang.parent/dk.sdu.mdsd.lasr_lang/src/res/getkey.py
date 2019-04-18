@@ -7,6 +7,9 @@ cloud_sdk = None
 apikey_file = None
 
 def get_paths():
+    global cloud_sdk, apikey_file
+    cloud_sdk = None
+    apikey_file = None
     for path in paths:
         found = check_path(path)
         if found:
@@ -28,14 +31,20 @@ def check_folders(root, directory):
         if cloud_sdk and apikey_file:
             return True
 
-try:
+def create_file():
     f = open("paths.txt","w+")
+    get_paths()
+    f.write(cloud_sdk + "\n" + apikey_file)
+
+try:
+    f = open("paths.txt","r+")
     lines = f.readlines()
     cloud_sdk = lines[0].rstrip("\n")
     apikey_file = lines[1].rstrip("\n")
+    if not os.path.isdir(cloud_sdk) or not os.path.isfile(apikey_file):
+        create_file()
 except (IndexError, FileNotFoundError) as e:
-    get_paths()
-    f.write(cloud_sdk + "\n" + apikey_file)
+    create_file()
 
 print(subprocess.call(["set", "GOOGLE_APPLICATION_CREDENTIALS=" + apikey_file, "&", "gcloud", "auth", "application-default", "print-access-token"], shell=True, cwd=cloud_sdk))
 sys.stdout.flush()
