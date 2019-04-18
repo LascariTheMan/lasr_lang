@@ -37,6 +37,5 @@ except (IndexError, FileNotFoundError) as e:
     get_paths()
     f.write(cloud_sdk + "\n" + apikey_file)
 
-print(apikey_file)
 print(subprocess.call(["set", "GOOGLE_APPLICATION_CREDENTIALS=" + apikey_file, "&", "gcloud", "auth", "application-default", "print-access-token"], shell=True, cwd=cloud_sdk))
 sys.stdout.flush()
