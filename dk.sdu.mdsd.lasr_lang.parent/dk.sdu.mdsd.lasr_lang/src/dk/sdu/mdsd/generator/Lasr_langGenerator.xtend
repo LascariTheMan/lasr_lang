@@ -35,8 +35,8 @@ class Lasr_langGenerator extends AbstractGenerator {
 		println(gson.toJson(agentJSON))
 		println(gson.toJson(intentJSON))
 		
-		//httpRequest.createIntent(intentJSON, gson)
 		httpRequest.allIntents
+		httpRequest.createIntent(intentJSON, gson)
 		//resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON]
 	}
 	 
@@ -85,13 +85,13 @@ class Lasr_langGenerator extends AbstractGenerator {
 				val json_part = new JsonObject
 				val part_text_key = "text"
 				var part_text_value = new String()
-				if (part.entity != null) {
+				if (part.entity !== null) {
 					val entity_type_value = checkTypes(part.entity)
 					json_part.addProperty("entityType", entity_type_value)
 					json_part.addProperty("alias", part.entity)
 				}
 				for (word : part.words) {
-					part_text_value = word.name
+					part_text_value = word.name + " "
 				}
 				json_part.addProperty(part_text_key, part_text_value)
 				parts.add(json_part)
@@ -118,7 +118,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		val values = new JsonArray
 		for (parameter : raw_value.parameters) {
 			val parameter_json = new JsonObject
-			if (parameter.req != null) {
+			if (parameter.req !== null) {
 				parameter_json.addProperty("mandatory", true)	
 			} else {
 				parameter_json.addProperty("mandatory", false)
