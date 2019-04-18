@@ -35,6 +35,10 @@ class HttpRequest {
 		}
 	}
 	
+	def createEntities() {
+		
+	}
+	
 	def getAllIntents() {
 		val httpClient = HttpClientBuilder.create().build()
 		val key = apiKeyManager.key
@@ -50,15 +54,19 @@ class HttpRequest {
 			result.append(reader.readLine)
 		}
 		
+		getIdFromIntents(result)
+	}
+	
+	def getIdFromIntents(StringBuffer result) {
 		val gson = new Gson
 		val result_gson = gson.fromJson(result.toString, JsonObject) 
 		val result_array = result_gson.getAsJsonArray("intents")
 		for (intent : result_array) {
 			if (intent instanceof JsonObject) {
 				val elements = intent.get("name").toString.split("/")
-				val id = elements.get(elements.length - 1)
-				println(id.substring(0, id.length - 1))
-				println(intent.get("displayName"))
+				val temp_id = elements.get(elements.length - 1)
+				val id = temp_id.substring(0, temp_id.length - 1)
+				val displayName = intent.get("displayName")
 			}
 		}
 	}

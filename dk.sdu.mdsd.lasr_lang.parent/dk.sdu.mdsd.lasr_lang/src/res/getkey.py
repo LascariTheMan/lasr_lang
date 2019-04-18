@@ -29,13 +29,14 @@ def check_folders(root, directory):
             return True
 
 try:
-    f = open("paths.txt","r+")
+    f = open("paths.txt","w+")
     lines = f.readlines()
     cloud_sdk = lines[0].rstrip("\n")
     apikey_file = lines[1].rstrip("\n")
-except IndexError:
+except (IndexError, FileNotFoundError) as e:
     get_paths()
     f.write(cloud_sdk + "\n" + apikey_file)
 
+print(apikey_file)
 print(subprocess.call(["set", "GOOGLE_APPLICATION_CREDENTIALS=" + apikey_file, "&", "gcloud", "auth", "application-default", "print-access-token"], shell=True, cwd=cloud_sdk))
 sys.stdout.flush()
