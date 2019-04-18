@@ -31,6 +31,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		val agentJSON = new JsonObject
 		val intentJSON = new JsonObject
 		val entityTypeJSON = new JsonObject
+		val apikeyManager = new ApiKeyManager
 		
 		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
 		resource.allContents.filter(Intent).forEach[generateIntentJSON(intentJSON)]
@@ -40,8 +41,10 @@ class Lasr_langGenerator extends AbstractGenerator {
 		println(gson.toJson(intentJSON))
 		println(gson.toJson(entityTypeJSON))
 		
-		//httpRequest.allIntents
-		//httpRequest.createIntent(intentJSON, gson)
+		httpRequest.updateKey(apikeyManager.key)
+		httpRequest.reset()
+		httpRequest.createIntent(intentJSON, gson)
+		httpRequest.createEntityTypes(entityTypeJSON, gson)
 	}
 	 
 	def generateAgentJSON(Agent agent, JsonObject obj) {
