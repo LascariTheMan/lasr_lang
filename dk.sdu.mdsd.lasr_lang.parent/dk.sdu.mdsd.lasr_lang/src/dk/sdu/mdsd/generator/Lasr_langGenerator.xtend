@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import dk.sdu.mdsd.lasr_lang.EntityType
 
 /**
  * Generates code from your model files on save.
@@ -29,15 +30,18 @@ class Lasr_langGenerator extends AbstractGenerator {
 		val httpRequest = new HttpRequest
 		val agentJSON = new JsonObject
 		val intentJSON = new JsonObject
+		val entityTypeJSON = new JsonObject
 		
 		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
 		resource.allContents.filter(Intent).forEach[generateIntentJSON(intentJSON)]
+		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypeJSON)]
+		
 		println(gson.toJson(agentJSON))
 		println(gson.toJson(intentJSON))
+		println(gson.toJson(entityTypeJSON))
 		
-		httpRequest.allIntents
-		httpRequest.createIntent(intentJSON, gson)
-		//resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON]
+		//httpRequest.allIntents
+		//httpRequest.createIntent(intentJSON, gson)
 	}
 	 
 	def generateAgentJSON(Agent agent, JsonObject obj) {
@@ -138,7 +142,29 @@ class Lasr_langGenerator extends AbstractGenerator {
 		obj.add(key, values)
 	}
 	
-	def generateEntityTypeJSON() {
-		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+	def generateEntityTypeJSON(EntityType entityType, JsonObject obj) {
+		obj.addProperty("displayName", entityType.name)
+		obj.addProperty("kind", "KIND_MAP")
+		if (entityType.exp == "true") {
+			obj.addProperty("autoExpansionMode", "AUTO_EXPANSION_MODE_DEFAULT")
+		} else {
+			obj.addProperty("autoExpansionMode", "AUTO_EXPANSION_MODE_UNSPECIFIED")
+		}
+		val key = "entities"
+		val value = new JsonArray
+		for (entities : entityType.entities) {
+			for (entity : entities.entity) {
+				val entry = new JsonObject
+				entry.addProperty("value", entity.value)
+				val entity_key = "synonyms"
+				val entity_value = new JsonArray
+				for (synonym : entity.syn) {
+					entity_value.add(synonym.syn)
+				}
+				entry.add(entity_key, entity_value)
+				value.add(entry)
+			}
+		}
+		obj.add(key, value)
 	}
 }
