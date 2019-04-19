@@ -8,7 +8,13 @@ import org.eclipse.core.runtime.FileLocator
 class ApiKeyManager {
 	
 	def getKey() {
-		val pb = new ProcessBuilder("python", "getkey.py")
+		val py = new ProcessBuilder("where", "python")
+		val pyproces= py.start()
+		
+		val reader2 = new BufferedReader(new InputStreamReader(pyproces.inputStream))
+		var python_path = reader2.readLine
+		
+		val pb = new ProcessBuilder(python_path, "getkey.py")
 		pb.directory(new File(FileLocator.resolve(class.classLoader.getResource('src/res/')).path))
 		
 		pb.redirectErrorStream(true)	
