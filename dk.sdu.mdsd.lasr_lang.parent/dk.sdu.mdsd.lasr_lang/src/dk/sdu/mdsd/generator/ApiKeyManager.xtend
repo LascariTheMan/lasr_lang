@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.FileLocator
 class ApiKeyManager {
 	
 	def getKey() {
-		val py = new ProcessBuilder("where", "python")
+		val py = new ProcessBuilder("cmd.exe", "/c", "where", "python")
 		val pyproces= py.start()
 		
 		val reader2 = new BufferedReader(new InputStreamReader(pyproces.inputStream))
@@ -21,10 +21,7 @@ class ApiKeyManager {
 		val proces = pb.start()
 		val reader = new BufferedReader(new InputStreamReader(proces.inputStream))
 		val line = reader.readLine
-		if (line === null) {
-			println("WARNING: You probably do not have GCloud SDK installed..")
-		}
-		
+			
 		return line
 	}
 }
