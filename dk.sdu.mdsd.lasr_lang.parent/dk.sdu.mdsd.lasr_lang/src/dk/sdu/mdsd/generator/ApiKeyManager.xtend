@@ -21,6 +21,9 @@ class ApiKeyManager {
 		val proces = pb.start()
 		val reader = new BufferedReader(new InputStreamReader(proces.inputStream))
 		val line = reader.readLine
+		if (line === null) {
+			println("WARNING: You probably do not have GCloud SDK installed..")
+		}
 		
 		return line
 	}
