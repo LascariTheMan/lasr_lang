@@ -17,6 +17,7 @@ import dk.sdu.mdsd.lasr_lang.TrainingPhrases
 import dk.sdu.mdsd.lasr_lang.List
 import dk.sdu.mdsd.lasr_lang.Parameters
 import dk.sdu.mdsd.lasr_lang.Phrase
+import dk.sdu.mdsd.lasr_lang.Messages
 
 /**
  * This class contains custom validation rules. 
@@ -40,6 +41,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	public static val IF_REQUIRED_PARAM_THEN_PROMPT = 'requiredParameterMustContainPrompt'
 	public static val PROMPT_STRING_SHOULD_NOT_BE_EMPTY = 'promptStringShouldNotBeEmpty'
 	public static val PHRASE_STRING_SHOULD_NOT_BE_EMPTY = 'phraseStringShouldNotBeEmpty'
+	public static val MESSAGE_STRING_SHOULD_NOT_BE_EMPTY = 'messageStringShouldNotBeEmpty'
 	public static val MISSING_INTENT_DISPLAYNAME = 'missingIntentDisplayName'
 	public static val DUPLICATE_ENTRY = 'duplicateEntryError'
 	public static val IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED = 'missingPhrasesWhenTrainingPhrasesFieldisDef'
@@ -91,6 +93,18 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 				warning("A prompt should not be empty",
 					lit.getPrompt_Words,
 					PROMPT_STRING_SHOULD_NOT_BE_EMPTY
+				)
+			}
+		}
+	}
+	
+	@Check
+	def messageStringShouldNotBeEmpty(Messages m) {
+		for(Words w : m.messages) {			
+			if("".equals(w.name)) {
+				warning("A message should not be empty",
+					lit.getMessages_Messages,
+					MESSAGE_STRING_SHOULD_NOT_BE_EMPTY
 				)
 			}
 		}
