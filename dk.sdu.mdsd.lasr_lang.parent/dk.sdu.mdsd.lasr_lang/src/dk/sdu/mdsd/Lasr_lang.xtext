@@ -94,9 +94,9 @@ Entities:
 ;
 
 Entity:
-	'entity' '{' 'value' ':' value=ID 'synonym' ':' syn+=Synonym(',' syn+=Synonym)* '}'
+	'entity' '{' 'value' ':' value = STRING 'synonym' ':' syn+=Synonym(',' syn+=Synonym)* '}'
 ;
 
 Synonym:
-	syn=ID
+	syn = STRING
 ;
