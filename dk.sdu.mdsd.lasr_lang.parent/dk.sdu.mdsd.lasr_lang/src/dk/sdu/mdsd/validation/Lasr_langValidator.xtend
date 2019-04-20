@@ -43,7 +43,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	public static val MISSING_INTENT_DISPLAYNAME = 'missingIntentDisplayName'
 	public static val DUPLICATE_ENTRY = 'duplicateEntryError'
 	public static val IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED = 'missingPhrasesWhenTrainingPhrasesFieldisDef'
-	public static val IF_TRAINING_PHRASES_ARE_ABSENT = 'absentTrainingPhrasesDefintion'
+	public static val IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT = 'absentTrainingPhrasesOrMessageDefintion'
 	
 	public val lit = Lasr_langPackage.eINSTANCE
 	// MIssing validation:
@@ -97,13 +97,20 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	}
 	
 	@Check
-	def ifTrainingPhrasesAreAbsent(Intent i) {
+	def ifTrainingPhrasesOrMessagesAreAbsent(Intent i) {
 		val iVals = newArrayList
 		for(var j = 0 ; j < i.values.length ; j++) {
 			iVals.add(i.values.get(j).iv.v)
 		}
 		if(!iVals.contains('trainingPhrases')) {
-			warning("This intent won't know much without a few training phrases", lit.getIntent_Name, IF_TRAINING_PHRASES_ARE_ABSENT)
+			warning("This intent won't know much without a few training phrases",
+				lit.getIntent_Name, dk.sdu.mdsd.validation.Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+			)
+		}
+		if(!iVals.contains('messages')) {
+			warning("This intent won't respond with anything without a few messages",
+				lit.getIntent_Name, dk.sdu.mdsd.validation.Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+			)
 		}
 	}
 	/*
