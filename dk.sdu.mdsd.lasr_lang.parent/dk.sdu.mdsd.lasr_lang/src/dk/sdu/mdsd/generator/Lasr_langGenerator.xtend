@@ -19,6 +19,7 @@ import org.eclipse.xtext.generator.IGeneratorContext
 import dk.sdu.mdsd.lasr_lang.EntityType
 import java.util.ArrayList
 import com.google.gson.Gson
+import dk.sdu.mdsd.lasr_lang.Messages
 
 /**
  * Generates code from your model files on save.
@@ -99,6 +100,8 @@ class Lasr_langGenerator extends AbstractGenerator {
 				generateTrainingPhrases(intent, obj, raw_value)			
 			} else if (raw_value instanceof Parameters) {
 				generateParameters(intent, obj, raw_value)
+			} else if (raw_value instanceof Messages) {
+				generateMessages(intent, obj, raw_value)
 			}
 		}
 		intents.add(obj)
@@ -166,6 +169,23 @@ class Lasr_langGenerator extends AbstractGenerator {
 			values.add(parameter_json)
 		}
 		obj.add(key, values)
+	}
+	
+	def generateMessages(Intent intent, JsonObject object, Messages messages) {
+		val key = "messages"
+		val value = new JsonArray
+		val text_value = new JsonObject
+		val text_array = new JsonObject
+		val array_of_messages = new JsonArray
+		
+		for (message : messages.messages) {
+			array_of_messages.add(message.name)
+		}
+		
+		text_array.add("text", array_of_messages)
+		text_value.add("text", text_array)
+		value.add(text_value)
+		object.add(key, value)
 	}
 	
 	def generateEntityTypeJSON(EntityType entityType, ArrayList<JsonObject> entityTypes) {
