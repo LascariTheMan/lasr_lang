@@ -29,6 +29,7 @@ import dk.sdu.mdsd.lasr_lang.Messages
 class Lasr_langGenerator extends AbstractGenerator {
 	
 	val httpRequest = new HttpRequest
+	val stringTypes = new StringTypes
 	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create()
@@ -137,12 +138,8 @@ class Lasr_langGenerator extends AbstractGenerator {
 	} 
 	
 	def String checkTypes(String entity) {
-		if (entity.equals("givenName")) {
-			return "@sys.given-name"
-		} if (entity.equals("timePeriod")) {
-			return "@sys.time-period"
-		} if (entity.equals("date")) {
-			return "@sys.date"
+		if (stringTypes.keywords.containsKey(entity)) {
+			return stringTypes.keywords.get(entity)
 		}
 		return entity
 	}
