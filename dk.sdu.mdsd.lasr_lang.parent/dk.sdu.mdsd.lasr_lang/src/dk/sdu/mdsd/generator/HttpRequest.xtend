@@ -61,7 +61,7 @@ class HttpRequest {
 			}
 			deleteAllIds(ids_to_delete, type)
 		} catch(NullPointerException e) {
-			
+			println("NO INTENTS TO DELETE FOUND - PROCEEDING TO CREATE STAGE")
 		}
 	}
 	

@@ -2,49 +2,7 @@ import subprocess
 import sys
 import os
 
-paths = ["C:\\Users", "C:\Program Files (x86)"]
-cloud_sdk = None
-apikey_file = None
+apikey_file = "apikey.json"
 
-def get_paths():
-    global cloud_sdk, apikey_file
-    cloud_sdk = None
-    apikey_file = None
-    for path in paths:
-        found = check_path(path)
-        if found:
-            break
-
-def check_path(path):
-    for root, directory, fil in os.walk(path):
-        found = check_folders(root, directory)
-        if found:
-            return True
-
-def check_folders(root, directory):
-    global cloud_sdk, apikey_file
-    for folder in directory:
-        if folder == "Cloud SDK":
-            cloud_sdk = os.path.join(root, folder)
-        if folder == "lasr_lang_apikey":
-            apikey_file = os.path.join(root, folder) + "\\apikey.json"
-        if cloud_sdk and apikey_file:
-            return True
-
-def create_file():
-    f = open("paths.txt","w+")
-    get_paths()
-    f.write(cloud_sdk + "\n" + apikey_file)
-
-try:
-    f = open("paths.txt","r+")
-    lines = f.readlines()
-    cloud_sdk = lines[0].rstrip("\n")
-    apikey_file = lines[1].rstrip("\n")
-    if not os.path.isdir(cloud_sdk) or not os.path.isfile(apikey_file):
-        create_file()
-except (IndexError, FileNotFoundError) as e:
-    create_file()
-
-print(subprocess.call(["set", "GOOGLE_APPLICATION_CREDENTIALS=" + apikey_file, "&", "gcloud", "auth", "application-default", "print-access-token"], shell=True, cwd=cloud_sdk))
+print(subprocess.call(["set", "GOOGLE_APPLICATION_CREDENTIALS=" + apikey_file, "&", "gcloud", "auth", "application-default", "print-access-token"], shell=True))
 sys.stdout.flush()
