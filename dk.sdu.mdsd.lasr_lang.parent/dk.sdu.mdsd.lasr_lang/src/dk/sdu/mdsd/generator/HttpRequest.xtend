@@ -47,18 +47,22 @@ class HttpRequest {
 		val ids_to_delete = new ArrayList<String>()
 		val result_gson = gson.fromJson(result.toString, JsonObject) 
 		val result_array = result_gson.getAsJsonArray(type)
-		for (obj : result_array) {
-			if (obj instanceof JsonObject) {
-				val path = removeQuotation(obj.get("name").toString).split("/")
-				val id = path.get(path.length - 1)
-				val displayName = removeQuotation(obj.get("displayName").toString)
-				
-				if (!intents_to_keep.contains(displayName)) {
-					ids_to_delete.add(id)
+		try {
+			for (obj : result_array) {
+				if (obj instanceof JsonObject) {
+					val path = removeQuotation(obj.get("name").toString).split("/")
+					val id = path.get(path.length - 1)
+					val displayName = removeQuotation(obj.get("displayName").toString)
+					
+					if (!intents_to_keep.contains(displayName)) {
+						ids_to_delete.add(id)
+					}
 				}
 			}
+			deleteAllIds(ids_to_delete, type)
+		} catch(NullPointerException e) {
+			
 		}
-		deleteAllIds(ids_to_delete, type)
 	}
 	
 	def removeQuotation(String element) {
