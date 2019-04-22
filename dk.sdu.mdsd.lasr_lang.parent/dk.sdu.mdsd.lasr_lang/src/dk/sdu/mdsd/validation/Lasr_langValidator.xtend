@@ -5,19 +5,19 @@ package dk.sdu.mdsd.validation
 
 import dk.sdu.mdsd.lasr_lang.Agent
 import dk.sdu.mdsd.lasr_lang.AgentValue
+import dk.sdu.mdsd.lasr_lang.EntityType
 import dk.sdu.mdsd.lasr_lang.Intent
 import dk.sdu.mdsd.lasr_lang.IntentValue
 import dk.sdu.mdsd.lasr_lang.Lasr_langPackage
+import dk.sdu.mdsd.lasr_lang.Messages
+import dk.sdu.mdsd.lasr_lang.Model
 import dk.sdu.mdsd.lasr_lang.Parameter
+import dk.sdu.mdsd.lasr_lang.Parameters
 import dk.sdu.mdsd.lasr_lang.Prompt
 import dk.sdu.mdsd.lasr_lang.Sentence
+import dk.sdu.mdsd.lasr_lang.TrainingPhrases
 import dk.sdu.mdsd.lasr_lang.Words
 import org.eclipse.xtext.validation.Check
-import dk.sdu.mdsd.lasr_lang.TrainingPhrases
-import dk.sdu.mdsd.lasr_lang.List
-import dk.sdu.mdsd.lasr_lang.Parameters
-import dk.sdu.mdsd.lasr_lang.Phrase
-import dk.sdu.mdsd.lasr_lang.Messages
 
 /**
  * This class contains custom validation rules. 
@@ -118,12 +118,12 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 		if(!iVals.contains('trainingPhrases')) {
 			warning("This intent won't know much without a few training phrases",
-				lit.getIntent_Name, dk.sdu.mdsd.validation.Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+				lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
 			)
 		}
 		if(!iVals.contains('messages')) {
 			warning("This intent won't respond with anything without a few messages",
-				lit.getIntent_Name, dk.sdu.mdsd.validation.Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+				lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
 			)
 		}
 	}
@@ -167,17 +167,47 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		val intentValSet = newHashSet
 			for (IntentValue v : intent.values) {
 				if(!intentValSet.add(v.iv.v)){
-					error("Duplicate entry", v.iv, null, DUPLICATE_ENTRY)
+					error("Duplicate entry", v.iv, null, DUPLICATE_ENTRY + " : "+ v.iv)
 				}
 			}
 		}		
+	
+	@Check
+	def checkNoIntentsWithSameName(Model m) {
+		val intentNames = newHashSet
+			for (Intent i : m.intents) {
+				if(!intentNames.add(i.name)){
+					error("Duplicate intent", i, null, DUPLICATE_ENTRY + " : "+ i.name)
+				}
+			}
+		}		
+	
+	@Check
+	def checkNoEntityWithSameName(Model m) {
+		val entityNames = newHashSet
+			for (EntityType e : m.entitytypes) {
+				if(!entityNames.add(e.name)){
+					error("Duplicate entity", e, null, DUPLICATE_ENTRY + " : "+ e.name)
+				}
+			}
+		}
+	
+	@Check
+	def checkNoParametersWithSameName(Parameters p) {
+		val parameterNames = newHashSet
+			for (Parameter pm : p.parameters) {
+				if(!parameterNames.add(pm.name)){
+					error("Duplicate parameter", pm, null, DUPLICATE_ENTRY + " : "+ pm.name)
+				}
+			}
+		}
 	
 	@Check
 	def checkAgentHasOnlyOneOfEachParam(Agent a) {
 		val agentValSet = newHashSet
 		for(var i = 0 ; i < a.values.length ; i++) {
 			if(!agentValSet.add(a.values.get(i).aa)){
-				error("Duplicate entry", a.values.get(i), null, DUPLICATE_ENTRY)
+				error("Duplicate entry", a.values.get(i), null, DUPLICATE_ENTRY + " : "+ a.values.get(i))
 			}
 		}		
 	}
