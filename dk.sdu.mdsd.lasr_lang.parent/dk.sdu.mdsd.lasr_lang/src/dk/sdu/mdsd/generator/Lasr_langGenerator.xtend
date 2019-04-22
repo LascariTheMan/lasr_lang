@@ -141,7 +141,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		if (stringTypes.keywords.containsKey(entity)) {
 			return stringTypes.keywords.get(entity)
 		}
-		return entity
+		return "@" + entity
 	}
 	
 	def generateParameters(Intent intent, JsonObject obj, Parameters raw_value) {
@@ -156,6 +156,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 			}
 			parameter_json.addProperty("displayName", parameter.name)
 			parameter_json.addProperty("entityTypeDisplayName", checkTypes(parameter.type))
+			parameter_json.addProperty("isList", false)
 			val prompt_key = "prompts"
 			val prompt_values = new JsonArray
 			for (prompt : parameter.prompts) {

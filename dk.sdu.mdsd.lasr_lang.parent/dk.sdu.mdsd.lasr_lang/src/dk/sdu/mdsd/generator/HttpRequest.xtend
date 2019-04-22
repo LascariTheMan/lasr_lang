@@ -11,6 +11,9 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.impl.client.BasicResponseHandler
+import org.apache.http.util.EntityUtils
+import org.apache.http.HttpResponse
 
 class HttpRequest {
 	
@@ -78,6 +81,9 @@ class HttpRequest {
 			
 			val response = httpClient.execute(httpDelete)
 			println("Response Code for deleting " + id + ": " + response.getStatusLine().getStatusCode())
+			if (response.getStatusLine().getStatusCode() !== 200){
+				printErrorMessage(response)
+			}
 		}
 	}
 	
@@ -107,5 +113,15 @@ class HttpRequest {
 		
 		val response = httpClient.execute(httpPost)
 		println("Response Code for creating EntityType " + body.get("displayName") + ": " + response.getStatusLine().getStatusCode())
+		if (response.getStatusLine().getStatusCode() !== 200){
+			printErrorMessage(response)
+		}
+	}
+	
+	def printErrorMessage(HttpResponse response) {
+		println(response.statusLine.reasonPhrase)
+		val entity = response.getEntity();
+		val responseString = EntityUtils.toString(entity, "UTF-8")
+		println(responseString)
 	}
 }
