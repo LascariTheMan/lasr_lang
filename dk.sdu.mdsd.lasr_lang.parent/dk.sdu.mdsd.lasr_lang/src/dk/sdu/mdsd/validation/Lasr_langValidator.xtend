@@ -48,14 +48,30 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	public static val IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT = 'absentTrainingPhrasesOrMessageDefintion'
 	
 	public val lit = Lasr_langPackage.eINSTANCE
-	// MIssing validation:
-	// Agent and Intent: validate that only 1 of each parameter has been written.
 	
+	/**
+   * Checks if any '<em><b>Agent</b></em>' parameters are missing.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def checkIfAgentParamsAreMissing(Agent agent) {
 		checkAgentParams(agent)
 	}
 	
+	/**
+   * Checks if '<em><b>AgentValues</b></em>' parameters are UpperCase.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def checkIfAgentParamsAreUpper(AgentValue av) {
 		if (!Character.isUpperCase(av.value.v.name.charAt(0))) {
@@ -65,11 +81,29 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
     	}
 	}
 	
+	/**
+   * Checks if '<em><b>AgentValues</b></em>' parameters are allowed, i.e the agent value "parent" =/= boolean.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def checkIfAgentParamsAreAllowed(AgentValue agentVal) {
 		checkAgentParams(agentVal)
 	}
 	
+	/**
+   * Checks if '<em><b>Parameter</b></em>' are required, and if so, that a prompt has been defined.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Parameter}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def ifRequiredParameterThenPrompts(Parameter param){
 		if(param.req == "required" && param.prompts.isEmpty()) {
@@ -79,6 +113,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 	}
 	
+	/**
+   * Checks if '<em><b>TrainingPhrases</b></em>' are defined, and if so, that a phrase has been defined.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.TrainingPhrases}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def ifTrainingPhrasesDefinedThenPhrasesMustBeDefined(TrainingPhrases tp) {
 		if(tp.v !== null && tp.phrases.isEmpty()) {
@@ -86,6 +129,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 	}
 	
+	/**
+   * Checks if a '<em><b>Prompt</b></em>' is empty, and if so, gives a warning.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Prompt}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def promptStringShouldNotBeEmpty(Prompt p) {
 		for(Words w : p.words) {			
@@ -98,6 +150,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 	}
 	
+	/**
+   * Checks if a '<em><b>Message</b></em>' is empty, and if so, gives a warning.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Messages}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def messageStringShouldNotBeEmpty(Messages m) {
 		for(Words w : m.messages) {			
@@ -110,6 +171,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 	}
 	
+	/**
+   * Checks if '<em><b>Messages</b></em>' or '<em><b>TrainingPhrases</b></em>' are absent, and if so, gives a warning.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Intent}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def ifTrainingPhrasesOrMessagesAreAbsent(Intent i) {
 		val iVals = newArrayList
@@ -150,6 +220,16 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 	}
 	 */
+	 
+	 /**
+   * Checks if a '<em><b>Phrase</b></em>' is empty, and if so, gives a warning.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Sentence}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def phraseStringShouldNotBeEmpty(Sentence s) {
 		for(Words w : s.words) {			
@@ -162,6 +242,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 	}
 	
+   /**
+   * Checks if a '<em><b>Intent</b></em>' has no duplicate entries.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Intent}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def checkIntentHasOnlyOneOfEachParam(Intent intent) {
 		val intentValSet = newHashSet
@@ -172,6 +261,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 			}
 		}		
 	
+	 /**
+   * Checks if the '<em><b>Model</b></em>' has no duplicate intents.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Model}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def checkNoIntentsWithSameName(Model m) {
 		val intentNames = newHashSet
@@ -182,6 +280,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 			}
 		}		
 	
+	 /**
+   * Checks if the '<em><b>Model</b></em>' has no duplicate entities.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Model}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def checkNoEntityWithSameName(Model m) {
 		val entityNames = newHashSet
@@ -192,6 +299,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 			}
 		}
 	
+	 /**
+   * Checks if a '<em><b>Parameters</b></em>' has no duplicate entries.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Parameters}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def checkNoParametersWithSameName(Parameters p) {
 		val parameterNames = newHashSet
@@ -202,6 +318,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 			}
 		}
 	
+	 /**
+   * Checks if a '<em><b>Agent</b></em>' has no duplicate entries.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Agent}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	@Check
 	def checkAgentHasOnlyOneOfEachParam(Agent a) {
 		val agentValSet = newHashSet
@@ -212,6 +337,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}		
 	}
 	
+	 /**
+   * Checks if an '<em><b>AgentValue</b></em>' has no type mismatches.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	def checkAgentParams(AgentValue agentVal) {
 		val bool = agentVal.value.bool
 		if(agentVal.value.bool == 'true' || agentVal.value.bool == 'false') {
@@ -244,6 +378,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		
 	}
 	
+	 /**
+   * Checks if an '<em><b>Agent</b></em>' has no missing parameters.
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Agent}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
 	def checkAgentParams(Agent agent) {
 		val agentValues = newArrayList
 		for(AgentValue v : agent.values) {
