@@ -7,6 +7,12 @@ import org.eclipse.core.runtime.FileLocator
 
 class ApiKeyManager {
 	
+	/**
+	 * Uses processbuilder to start a Python script via command line. 
+	 * The getkey script will set an environment variable, which provides a path to the api key file.
+	 * This environment is used by gcloud to fetch a new api key. 
+	 * The print out from the python script is read through the input stream. 
+	 */
 	def getKey() {
 		/*
 		val py = new ProcessBuilder("where", "python")

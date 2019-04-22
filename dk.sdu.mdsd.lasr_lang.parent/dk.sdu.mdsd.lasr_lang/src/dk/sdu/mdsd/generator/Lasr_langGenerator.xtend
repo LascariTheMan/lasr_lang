@@ -31,6 +31,14 @@ class Lasr_langGenerator extends AbstractGenerator {
 	val httpRequest = new HttpRequest
 	val stringTypes = new StringTypes
 	
+	/**
+	 * Called when saving DSL.
+	 * Generates JSON objets for each intent and EntityType
+	 * Gets an updated API key for Cloud SDK
+	 * Resets by deleting all intents and entitytypes excisting on the project
+	 * Creates new intents and entitytypes
+	 * 
+	 */
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create()
 		
@@ -52,6 +60,14 @@ class Lasr_langGenerator extends AbstractGenerator {
 		createIntentsAndEntityTypes(intents, entityTypes, gson)
 	}
 	
+	
+	/**
+	 * Will print all intents and entitytypes to the console
+	 * 
+	 * @param intents, the list of JSON objects to print
+	 * @param entityTypes, the list of entitytypes to print
+	 * @param gson, the gson object to handle the printout
+	 */
 	def printIntentsAndEntityTypes(ArrayList<JsonObject> intents, ArrayList<JsonObject> entityTypes, Gson gson) {
 		for (intent : intents) {
 			println(gson.toJson(intent))	
@@ -61,6 +77,13 @@ class Lasr_langGenerator extends AbstractGenerator {
 		}
 	}
 	
+	/**
+	 * Will create all intents and entitytypes with http requests per object in the lists
+	 * 
+	 * @param intents, the list of JSON objects to print
+	 * @param entityTypes, the list of entitytypes to print
+	 * @param gson, the gson object to handle the printout
+	 */
 	def createIntentsAndEntityTypes(ArrayList<JsonObject> intents, ArrayList<JsonObject> entityTypes, Gson gson) {
 		for (intent : intents) {
 			httpRequest.createIntent(intent, gson)
@@ -70,6 +93,12 @@ class Lasr_langGenerator extends AbstractGenerator {
 		}
 	}
 	 
+	/**
+	 * Will generate a JSON object representing the agent defined in the DSL.
+	 * 
+	 * @param agent, the agent object from the DSL, which the JSON object is created of.
+	 * @param obj, the JSON object that will be sent in the http request. 
+	 */
 	def generateAgentJSON(Agent agent, JsonObject obj) {
 		var key = new String()
 		var value = new Object()
@@ -86,6 +115,12 @@ class Lasr_langGenerator extends AbstractGenerator {
 		}
 	}
 	
+	/**
+	 * Will generate a JSON object representing an intent defined in the DSL.
+	 * 
+	 * @param intent, the agent object from the DSL, which the JSON object is created of.
+	 * @param intents, the list of intents that contains all intents that must be sent with http requests 
+	 */
 	def generateIntentJSON(Intent intent, ArrayList<JsonObject> intents) {
 		val obj = new JsonObject
 		var key = new String()
@@ -108,6 +143,15 @@ class Lasr_langGenerator extends AbstractGenerator {
 		intents.add(obj)
 	}
 	
+	/**
+	 * Will generate a JSON array of TrainingPhrases.
+	 * If a sentence in the training phrase contains any entities, more properties are added. 
+	 * Spaces are appended at the beginning and end of each set of words, as it is required from Dialogflow. 
+	 * 
+	 * @param intent, the agent object from the DSL, which the JSON object is created of.
+	 * @param obj, the JSON object that is created for the whole intent. Is used to parse the final JSON array of training phrases. 
+	 * @param raw_value, the data given from the DSL to build the training phrases.  
+	 */
 	def generateTrainingPhrases(Intent intent, JsonObject obj, TrainingPhrases raw_value) {
 		val key = "trainingPhrases"
 		val values = new JsonArray
@@ -137,6 +181,13 @@ class Lasr_langGenerator extends AbstractGenerator {
 		obj.add(key, values)
 	} 
 	
+	/**
+	 * Will map a entity string to a string that Dialogflow understands. 
+	 * Some entities are defined beforehand in Dialogflow and these are checked. 
+	 * If it doesn't match, then we'll assume it's a custom entity, and then only a '@' is appended. 
+	 * 
+	 * @param entity, the entity string to check.  
+	 */
 	def String checkTypes(String entity) {
 		if (stringTypes.keywords.containsKey(entity)) {
 			return stringTypes.keywords.get(entity)
@@ -144,6 +195,14 @@ class Lasr_langGenerator extends AbstractGenerator {
 		return "@" + entity
 	}
 	
+	
+	/**
+	 * Will generate the parameter array that is appended to the JSON intent. 
+	 * 
+	 * @param intent, the agent object from the DSL, which the JSON object is created of.
+	 * @param obj, the JSON object that is created for the whole intent. Is used to parse the final JSON array of parameters. 
+	 * @param raw_value, the data given from the DSL to build the parameters.  
+	 */
 	def generateParameters(Intent intent, JsonObject obj, Parameters raw_value) {
 		val key = raw_value.v
 		val values = new JsonArray
@@ -170,6 +229,13 @@ class Lasr_langGenerator extends AbstractGenerator {
 		obj.add(key, values)
 	}
 	
+	/**
+	 * Will generate a JSON array of messages, used for response to the user.  
+	 * 
+	 * @parram intent, the intent object from the DSL, which the JSON object is created of.
+	 * @param object, the JSON object that is created for the whole intent. Is used to parse the final array of messages to the intent. 
+	 * @param messages, the messages given from the DSL to build the response messages.  
+	 */
 	def generateMessages(Intent intent, JsonObject object, Messages messages) {
 		val key = "messages"
 		val value = new JsonArray
@@ -187,6 +253,12 @@ class Lasr_langGenerator extends AbstractGenerator {
 		object.add(key, value)
 	}
 	
+	/**
+	 * Will generate a JSON objects for an entitytype 
+	 * 
+	 * @param entityType, the entityType object that must be parsed to a JSON object. 
+	 * @param entityTypes, the array of entityTypes that must be sent with the http requests.   
+	 */
 	def generateEntityTypeJSON(EntityType entityType, ArrayList<JsonObject> entityTypes) {
 		val obj = new JsonObject
 		obj.addProperty("displayName", entityType.name)
