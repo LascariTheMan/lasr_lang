@@ -20,6 +20,8 @@ import dk.sdu.mdsd.lasr_lang.EntityType
 import java.util.ArrayList
 import com.google.gson.Gson
 import dk.sdu.mdsd.lasr_lang.Messages
+import java.util.HashMap
+import dk.sdu.mdsd.lasr_lang.AbstractIntent
 
 /**
  * Generates code from your model files on save.
@@ -30,6 +32,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	
 	val httpRequest = new HttpRequest
 	val stringTypes = new StringTypes
+	val abstractIntents = new HashMap<String, AbstractIntent>()
 	
 	/**
 	 * Called when saving DSL.
@@ -47,6 +50,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		val agentJSON = new JsonObject
 		val apikeyManager = new ApiKeyManager
 		
+		resource.allContents.filter(AbstractIntent).forEach[addAbstractIntents()]
 		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
 		resource.allContents.filter(Intent).forEach[generateIntentJSON(intents)]
 		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypes)]
@@ -59,7 +63,6 @@ class Lasr_langGenerator extends AbstractGenerator {
 		httpRequest.reset()
 		createIntentsAndEntityTypes(intents, entityTypes, gson)
 	}
-	
 	
 	/**
 	 * Will print all intents and entitytypes to the console
@@ -91,6 +94,10 @@ class Lasr_langGenerator extends AbstractGenerator {
 		for (entityType : entityTypes) {
 			httpRequest.createEntityTypes(entityType, gson)	
 		}
+	}
+	
+	def addAbstractIntents(AbstractIntent abstractIntent) {
+		abstractIntents.put(abstractIntent.name, abstractIntent)
 	}
 	 
 	/**
@@ -139,6 +146,9 @@ class Lasr_langGenerator extends AbstractGenerator {
 			} else if (raw_value instanceof Messages) {
 				generateMessages(intent, obj, raw_value)
 			}
+		}
+		if (intent.toExtend !== null) {
+			println("Der er en abstract!")
 		}
 		intents.add(obj)
 	}

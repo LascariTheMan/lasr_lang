@@ -3,7 +3,7 @@ grammar dk.sdu.mdsd.Lasr_lang with org.eclipse.xtext.common.Terminals
 generate lasr_lang "http://www.sdu.dk/mdsd/lasr_lang"
 
 Model:
-	intents+=Intent* entitytypes+=EntityType*
+	abstractIntents+=AbstractIntent* intents+=Intent* entitytypes+=EntityType*
 ;
 
 Agent:
@@ -30,10 +30,15 @@ Bool:
 	'true' | 'false'
 ;
 
+// Abstract Intent ----------------------------------------------------------------------------------------------------------------
+
+AbstractIntent:
+	{AbstractIntent} 'abstract' 'intent' name=ID '{' values+=Parameters* '}'
+;
 
 // Intents----------------------------------------------------------------------------------------------------------------
 Intent:
-	{Intent} 'Intent' name=ID '{'values+=IntentValue*'}'
+	{Intent} 'Intent' name=ID ('extends' toExtend=ID)? '{' values+=IntentValue* '}'
 ;
 
 IntentValue:
