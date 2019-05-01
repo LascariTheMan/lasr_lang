@@ -3,7 +3,7 @@ grammar dk.sdu.mdsd.Lasr_lang with org.eclipse.xtext.common.Terminals
 generate lasr_lang "http://www.sdu.dk/mdsd/lasr_lang"
 
 Model:
-	intents+=Intent* entitytypes+=EntityType*
+	abstractIntents+=AbstractIntent intents+=Intent* entitytypes+=EntityType*
 ;
 
 Agent:
@@ -33,7 +33,7 @@ Bool:
 
 // Intents----------------------------------------------------------------------------------------------------------------
 Intent:
-	{Intent} 'Intent' name=ID '{'values+=IntentValue*'}'
+	{Intent} 'Intent' name=ID (':' ai=[AbstractIntent]) '{'values+=IntentValue*'}'
 ;
 
 IntentValue:
@@ -82,6 +82,51 @@ Prompt:
 
 Messages:
 	{Messages} v='messages' '{' messages+=Words(',' messages+=Words)* '}'
+;
+
+// AbstractIntent -----------------------------------------------------------------------------------------------------------------
+AbstractIntent:
+	'AbstractIntent' name = ID '{' abstractValues+=AbstractIntentValue* '}'
+;
+
+AbstractIntentValue:
+	AbstractList
+;
+
+AbstractList:
+	AbstractTrainingPhrases | AbstractParameters | AbstractMessages
+;
+
+AbstractTrainingPhrases:
+	v='trainingPhrases' '{' abstractPhrases+=AbstractPhrase+'}'
+;
+
+AbstractPhrase:
+	'phrase' ':' abstractSentences+=AbstractSentence(',' abstractSentences+=AbstractSentence)*
+;
+
+AbstractSentence:
+	{Sentence} (abstractWords+=AbstractWords)+ ('('abstractEntity=ID')')?
+;
+
+AbstractWords:
+	name = STRING
+;
+
+AbstractParameters:
+	{Parameters} v='parameters' '{'abstractParameters+=AbstractParameter*'}'
+;
+
+AbstractParameter:
+	req=('required')? 'parameter' name=ID '{' 'entityType' ':' type=ID  abstractPrompts+=AbstractPrompt* '}'
+;
+
+AbstractPrompt:
+	{Prompt} ('prompt' ':' (abstractWords+=AbstractWords(',' abstractWords+=AbstractWords)*)+)
+;
+
+AbstractMessages:
+	{Messages} v='messages' '{' abstractMessages+=AbstractWords(',' abstractMessages+=AbstractWords)* '}'
 ;
 
 // EntityType ---------------------------------------------------------------------------------------------------------------------
