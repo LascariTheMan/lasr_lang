@@ -90,11 +90,19 @@ AbstractIntent:
 ;
 
 AbstractIntentValue:
-	iv=AbstractList
+	aiv=AbstractIntentOptional
+;
+
+AbstractIntentOptional:
+	AbstractList | AbstractKeyValue
+;
+
+AbstractKeyValue:
+	v='action' ':' name=ID
 ;
 
 AbstractList:
-	v=AbstractTrainingPhrases | v=AbstractParameters | v=AbstractMessages
+	AbstractTrainingPhrases | AbstractParameters | AbstractMessages
 ;
 
 AbstractTrainingPhrases:

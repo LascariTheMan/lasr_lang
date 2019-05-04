@@ -49,7 +49,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		resource.allContents.filter(AbstractIntent).forEach[generateAbstractIntentTypeJSON(abstractIntents)]
 		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypes)]
 		
-		println(gson.toJson(agentJSON))
+		
 		printIntentsAndEntityTypes(intents, entityTypes, abstractIntents, gson)
 		
 		
@@ -58,27 +58,6 @@ class Lasr_langGenerator extends AbstractGenerator {
 		createIntentsAndEntityTypes(intents, entityTypes, gson)
 	}
 	
-	def generateAbstractIntentTypeJSON(AbstractIntent abstractIntent, ArrayList<JsonObject> abstractIntents) {
-		val obj = new JsonObject
-		var key = new String()
-		var value = new Object()
-		obj.addProperty("displayName", abstractIntent.name)
-		for (i : abstractIntent.abstractValues) {
-			val raw_value = i.iv
-			if (raw_value instanceof KeyValue) {
-				key = raw_value.v 
-				value = raw_value.name
-				obj.addProperty(key, value.toString)
-			} else if (raw_value instanceof AbstractTrainingPhrases) {
-				generateTrainingPhrases(abstractIntent, obj, raw_value)			
-			} else if (raw_value instanceof AbstractParameters) {
-				generateParameters(abstractIntent, obj, raw_value)
-			} else if (raw_value instanceof AbstractMessages) {
-				generateMessages(abstractIntent, obj, raw_value)
-			}
-		}
-		abstractIntents.add(obj)
-	}
 	
 	def printIntentsAndEntityTypes(ArrayList<JsonObject> intents, ArrayList<JsonObject> entityTypes, ArrayList<JsonObject> abstractIntents , Gson gson) {
 		/*for (intent : intents) {
@@ -137,6 +116,28 @@ class Lasr_langGenerator extends AbstractGenerator {
 			}
 		}
 		intents.add(obj)
+	}
+	
+	def generateAbstractIntentTypeJSON(AbstractIntent abstractIntent, ArrayList<JsonObject> abstractIntents) {
+		val obj = new JsonObject
+		obj.addProperty("displayName", abstractIntent.name)
+		var key = new String()
+		var value = new Object()
+		for (i : abstractIntent.abstractValues) {
+			val raw_value = i.aiv
+			if (raw_value instanceof KeyValue) {
+				key = raw_value.v 
+				value = raw_value.name
+				obj.addProperty(key, value.toString)
+            } else if (raw_value instanceof AbstractTrainingPhrases) {
+				generateTrainingPhrases(abstractIntent, obj, raw_value)			
+			} else if (raw_value instanceof AbstractParameters) {
+				generateParameters(abstractIntent, obj, raw_value)
+			} else if (raw_value instanceof AbstractMessages) {
+				generateMessages(abstractIntent, obj, raw_value)
+			}
+		}
+		abstractIntents.add(obj)
 	}
 	
 	def generateTrainingPhrases(Intent intent, JsonObject obj, TrainingPhrases raw_value) {
