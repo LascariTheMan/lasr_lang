@@ -90,11 +90,11 @@ AbstractIntent:
 ;
 
 AbstractIntentValue:
-	AbstractList
+	iv=AbstractList
 ;
 
 AbstractList:
-	AbstractTrainingPhrases | AbstractParameters | AbstractMessages
+	v=AbstractTrainingPhrases | v=AbstractParameters | v=AbstractMessages
 ;
 
 AbstractTrainingPhrases:
@@ -106,7 +106,7 @@ AbstractPhrase:
 ;
 
 AbstractSentence:
-	{AbstractSentence} (words+=AbstractWords)+ ('('entity=ID')')?
+	{AbstractSentence} (abstractWords+=AbstractWords)+ ('('entity=ID')')?
 ;
 
 AbstractWords:
