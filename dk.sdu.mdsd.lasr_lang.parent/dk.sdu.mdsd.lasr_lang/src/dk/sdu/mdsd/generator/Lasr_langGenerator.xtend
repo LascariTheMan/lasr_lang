@@ -22,6 +22,9 @@ import com.google.gson.Gson
 import dk.sdu.mdsd.lasr_lang.Messages
 import java.util.HashMap
 import dk.sdu.mdsd.lasr_lang.AbstractIntent
+import dk.sdu.mdsd.lasr_lang.Parameter
+import dk.sdu.mdsd.lasr_lang.List
+import dk.sdu.mdsd.lasr_lang.Words
 
 /**
  * Generates code from your model files on save.
@@ -33,6 +36,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	val httpRequest = new HttpRequest
 	val stringTypes = new StringTypes
 	val abstractIntents = new HashMap<String, AbstractIntent>()
+	val definedInjections = new HashMap<String, String>()
 	
 	/**
 	 * Called when saving DSL.
@@ -59,9 +63,9 @@ class Lasr_langGenerator extends AbstractGenerator {
 		printIntentsAndEntityTypes(intents, entityTypes, gson)
 		
 		
-		httpRequest.updateKey(apikeyManager.key)
-		httpRequest.reset()
-		createIntentsAndEntityTypes(intents, entityTypes, gson)
+		//httpRequest.updateKey(apikeyManager.key)
+		//httpRequest.reset()
+		//createIntentsAndEntityTypes(intents, entityTypes, gson)
 	}
 	
 	/**
@@ -144,13 +148,60 @@ class Lasr_langGenerator extends AbstractGenerator {
 			} else if (raw_value instanceof Parameters) {
 				generateParameters(intent, obj, raw_value)
 			} else if (raw_value instanceof Messages) {
-				generateMessages(intent, obj, raw_value)
+				generateMessages(obj, raw_value)
 			}
 		}
-		if (intent.toExtend !== null) {
-			println("Der er en abstract!")
+		if (intent.toExtend !== null && abstractIntents.containsKey(intent.toExtend)) {
+			addDefinedInjections(intent)
+			appendAbstractIntent(intent, obj)
 		}
 		intents.add(obj)
+	}
+	
+	def addDefinedInjections(Intent intent) {
+		
+	}
+	
+	def appendAbstractIntent(Intent intent, JsonObject obj) {
+		val aIntent = abstractIntents.get(intent.toExtend)
+		for (aValue : aIntent.values) {
+			if (aValue instanceof Parameters) {
+				if (obj.getAsJsonArray("parameters") === null) {
+					obj.add("parameters", new JsonArray)
+				} 
+				val parameters = obj.getAsJsonArray("parameters")
+				for (parameter: aValue.parameters) {
+					parameters.add(appendParameter(aIntent, obj, parameter))
+				}	
+			} else if (aValue instanceof Messages) {
+				handleInjections(intent, aValue)
+				if (obj.getAsJsonArray("messages") === null) {
+					generateMessages(obj, aValue)
+				} else {
+					appendMessages(obj, aValue)
+				}
+			}
+		}
+	}
+	
+	def handleInjections(Intent intent, Messages messages) {
+		val toFind = "%"
+		for (message : messages.messages) {
+			var fromIndex = 0
+			while ((fromIndex = message.name.indexOf(toFind, fromIndex)) != -1 ) {
+	            replaceWithWord(message.name, fromIndex)
+	            fromIndex++
+        	}
+		}
+	}
+	
+	def replaceWithWord(String message, int fromIndex) {
+		val endOfWord = message.indexOf(" ", fromIndex)
+		val injection = message.substring(fromIndex+1, endOfWord)
+		var newValue = message.substring(0, fromIndex) + definedInjections.get(injection)
+		if (endOfWord !== -1) {	
+			newValue += message.substring(endOfWord)	
+		}
 	}
 	
 	/**
@@ -239,6 +290,27 @@ class Lasr_langGenerator extends AbstractGenerator {
 		obj.add(key, values)
 	}
 	
+	def appendParameter(AbstractIntent intent, JsonObject obj, Parameter parameter) {
+		val parameter_json = new JsonObject
+		if (parameter.req !== null) {
+			parameter_json.addProperty("mandatory", true)	
+		} else {
+			parameter_json.addProperty("mandatory", false)
+		}
+		parameter_json.addProperty("displayName", parameter.name)
+		parameter_json.addProperty("entityTypeDisplayName", checkTypes(parameter.type))
+		parameter_json.addProperty("isList", false)
+		val prompt_key = "prompts"
+		val prompt_values = new JsonArray
+		for (prompt : parameter.prompts) {
+			for (word : prompt.words) {
+				prompt_values.add(word.name)
+			}
+		}
+		parameter_json.add(prompt_key, prompt_values)
+		return parameter_json
+	}
+	
 	/**
 	 * Will generate a JSON array of messages, used for response to the user.  
 	 * 
@@ -246,7 +318,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	 * @param object, the JSON object that is created for the whole intent. Is used to parse the final array of messages to the intent. 
 	 * @param messages, the messages given from the DSL to build the response messages.  
 	 */
-	def generateMessages(Intent intent, JsonObject object, Messages messages) {
+	def generateMessages(JsonObject object, Messages messages) {
 		val key = "messages"
 		val value = new JsonArray
 		val text_value = new JsonObject
@@ -261,6 +333,14 @@ class Lasr_langGenerator extends AbstractGenerator {
 		text_value.add("text", text_array)
 		value.add(text_value)
 		object.add(key, value)
+	}
+	
+	def appendMessages(JsonObject object, Messages messages) {
+		val messageArray = object.getAsJsonArray("messages").get(0) as JsonObject
+		val messagesList = messageArray.getAsJsonObject("text").getAsJsonArray("text")
+		for (message : messages.messages) {
+			messagesList.add(message.name)
+		}
 	}
 	
 	/**

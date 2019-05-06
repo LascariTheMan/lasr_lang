@@ -33,12 +33,16 @@ Bool:
 // Abstract Intent ----------------------------------------------------------------------------------------------------------------
 
 AbstractIntent:
-	{AbstractIntent} 'abstract' 'intent' name=ID '{' values+=Parameters* '}'
+	{AbstractIntent} 'abstract' 'intent' name=ID '{' values+=List* '}'
 ;
 
 // Intents----------------------------------------------------------------------------------------------------------------
 Intent:
-	{Intent} 'Intent' name=ID ('extends' toExtend=ID)? '{' values+=IntentValue* '}'
+	{Intent} 'Intent' name=ID ('extends' toExtend=ID ('(' injections+=Injection(',' injections+=Injection)* ')')?)? '{' values+=IntentValue* '}'
+;
+
+Injection:
+	key=ID ':' value=ID
 ;
 
 IntentValue:
