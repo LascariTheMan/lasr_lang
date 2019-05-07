@@ -21,9 +21,8 @@ import java.util.ArrayList
 import com.google.gson.Gson
 import dk.sdu.mdsd.lasr_lang.Messages
 import dk.sdu.mdsd.lasr_lang.AbstractIntent
-import dk.sdu.mdsd.lasr_lang.AbstractTrainingPhrases
-import dk.sdu.mdsd.lasr_lang.AbstractParameters
-import dk.sdu.mdsd.lasr_lang.AbstractMessages
+import java.util.HashMap
+import dk.sdu.mdsd.lasr_lang.Parameter
 
 /**
  * Generates code from your model files on save.
@@ -34,23 +33,23 @@ class Lasr_langGenerator extends AbstractGenerator {
 	
 	val httpRequest = new HttpRequest
 	val stringTypes = new StringTypes
+	val abstractIntents = new HashMap<String, AbstractIntent>()
 	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create()
 		
 		val intents = new ArrayList<JsonObject>()
-		val abstractIntents = new ArrayList<JsonObject>()
 		val entityTypes = new ArrayList<JsonObject>()
 		val agentJSON = new JsonObject
 		val apikeyManager = new ApiKeyManager
 		
 		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
-		resource.allContents.filter(Intent).forEach[generateIntentJSON(intents)]
-		resource.allContents.filter(AbstractIntent).forEach[generateAbstractIntentTypeJSON(abstractIntents)]
+		resource.allContents.filter(Intent).forEach[generateIntentJSON(intents) findAbstractIntents()]
+		//resource.allContents.filter(AbstractIntent).forEach[findAbstractIntents()]
 		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypes)]
 		
 		
-		printIntentsAndEntityTypes(intents, entityTypes, abstractIntents, gson)
+		printIntentsAndEntityTypes(intents, entityTypes, gson)
 		
 		
 		httpRequest.updateKey(apikeyManager.key)
@@ -58,17 +57,21 @@ class Lasr_langGenerator extends AbstractGenerator {
 		createIntentsAndEntityTypes(intents, entityTypes, gson)
 	}
 	
-	
-	def printIntentsAndEntityTypes(ArrayList<JsonObject> intents, ArrayList<JsonObject> entityTypes, ArrayList<JsonObject> abstractIntents , Gson gson) {
-		/*for (intent : intents) {
-			println(gson.toJson(intent))	
-		}*/
-		for (abstractIntent : abstractIntents) {
-			println(gson.toJson(abstractIntent))	
+	def findAbstractIntents(Intent intent) {
+		if(intent.ai !== null) {
+			abstractIntents.put(intent.ai.name, intent.ai)	
 		}
-		/*for (entityType : entityTypes) {
+	}
+	
+	
+	def printIntentsAndEntityTypes(ArrayList<JsonObject> intents, ArrayList<JsonObject> entityTypes, Gson gson) {
+		for (intent : intents) {
+			println(gson.toJson(intent))	
+		}
+
+		for (entityType : entityTypes) {
 			println(gson.toJson(entityType))	
-		}*/
+		}
 	}
 	
 	def createIntentsAndEntityTypes(ArrayList<JsonObject> intents, ArrayList<JsonObject> entityTypes, Gson gson) {
@@ -112,33 +115,65 @@ class Lasr_langGenerator extends AbstractGenerator {
 			} else if (raw_value instanceof Parameters) {
 				generateParameters(intent, obj, raw_value)
 			} else if (raw_value instanceof Messages) {
-				generateMessages(intent, obj, raw_value)
+				generateMessages(obj, raw_value)
 			}
+		}
+		if(intent.ai !== null && abstractIntents.containsKey(intent.ai.name)) {
+			appendAbstractIntentJSON(intent, obj)
 		}
 		intents.add(obj)
 	}
-	
-	def generateAbstractIntentTypeJSON(AbstractIntent abstractIntent, ArrayList<JsonObject> abstractIntents) {
-		val obj = new JsonObject
-		obj.addProperty("displayName", abstractIntent.name)
-		var key = new String()
-		var value = new Object()
-		for (i : abstractIntent.abstractValues) {
-			val raw_value = i.aiv
-			if (raw_value instanceof KeyValue) {
-				key = raw_value.v 
-				value = raw_value.name
-				obj.addProperty(key, value.toString)
-            } else if (raw_value instanceof AbstractTrainingPhrases) {
-				generateTrainingPhrases(abstractIntent, obj, raw_value)			
-			} else if (raw_value instanceof AbstractParameters) {
-				generateParameters(abstractIntent, obj, raw_value)
-			} else if (raw_value instanceof AbstractMessages) {
-				generateMessages(abstractIntent, obj, raw_value)
+	 
+	def appendAbstractIntentJSON(Intent intent, JsonObject objToExtend) {
+		val aIntent = abstractIntents.get(intent.ai.name)
+		for (aValue : aIntent.abstractValues) {
+			if (aValue instanceof Parameters) {
+				if (objToExtend.getAsJsonArray("parameters") === null) {
+					objToExtend.add("parameters", new JsonArray)
+				} 
+				val parameters = objToExtend.getAsJsonArray("parameters")
+				for (parameter: aValue.parameters) {
+					parameters.add(appendParameter(aIntent, objToExtend, parameter))
+				}	
+			} else if (aValue instanceof Messages) {
+				if (objToExtend.getAsJsonArray("messages") === null) {
+					generateMessages(objToExtend, aValue)
+				} else {
+					appendMessages(objToExtend, aValue)
+				}
 			}
 		}
-		abstractIntents.add(obj)
 	}
+	
+	def appendParameter(AbstractIntent intent, JsonObject object, Parameter parameter) {
+		val parameter_json = new JsonObject
+		if (parameter.req !== null) {
+			parameter_json.addProperty("mandatory", true)	
+		} else {
+			parameter_json.addProperty("mandatory", false)
+		}
+		parameter_json.addProperty("displayName", parameter.name)
+		parameter_json.addProperty("entityTypeDisplayName", checkTypes(parameter.type))
+		parameter_json.addProperty("isList", false)
+		val prompt_key = "prompts"
+		val prompt_values = new JsonArray
+		for (prompt : parameter.prompts) {
+			for (word : prompt.words) {
+				prompt_values.add(word.name)
+			}
+		}
+		parameter_json.add(prompt_key, prompt_values)
+		return parameter_json
+	}
+	
+	def appendMessages(JsonObject object, Messages messages) {
+		val messageArray = object.getAsJsonArray("messages").get(0) as JsonObject
+		val messagesList = messageArray.getAsJsonObject("text").getAsJsonArray("text")
+		for (message : messages.messages) {
+			messagesList.add(message.name)
+		}	
+	}
+	
 	
 	def generateTrainingPhrases(Intent intent, JsonObject obj, TrainingPhrases raw_value) {
 		val key = "trainingPhrases"
@@ -168,36 +203,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		}
 		obj.add(key, values)
 	}
-	
-	def generateTrainingPhrases(AbstractIntent abstractIntent, JsonObject obj, AbstractTrainingPhrases raw_value) {
-		val key = "trainingPhrases"
-		val values = new JsonArray
-		for (phrase : raw_value.abstractPhrases) {
-			val entry_phrase = new JsonObject
-			val parts_key = "parts"
-			val parts = new JsonArray
-			for (part : phrase.sentences) {
-				val json_part = new JsonObject
-				val part_text_key = "text"
-				var part_text_value = new String()
-				if (part.entity !== null) {
-					val entity_type_value = checkTypes(part.entity)
-					json_part.addProperty("entityType", entity_type_value)
-					json_part.addProperty("alias", part.entity)
-					json_part.addProperty("userDefined", "true")
-				}
-				for (word : part.abstractWords) {
-					part_text_value = " " + word.name + " "
-				}
-				json_part.addProperty(part_text_key, part_text_value)
-				parts.add(json_part)
-			}
-			entry_phrase.add(parts_key, parts)
-			values.add(entry_phrase)
-		}
-		obj.add(key, values)
-	}  
-	
+
 	def String checkTypes(String entity) {
 		if (stringTypes.keywords.containsKey(entity)) {
 			return stringTypes.keywords.get(entity)
@@ -228,36 +234,11 @@ class Lasr_langGenerator extends AbstractGenerator {
 			parameter_json.add(prompt_key, prompt_values)
 			values.add(parameter_json)
 		}
-		obj.add(key, values)
+		obj.add(key, values)	
 	}
+
 	
-	def generateParameters(AbstractIntent abstractIntent, JsonObject obj, AbstractParameters raw_value) {
-		val key = raw_value.v
-		val values = new JsonArray
-		for (parameter : raw_value.abstractParameters) {
-			val parameter_json = new JsonObject
-			if (parameter.req !== null) {
-				parameter_json.addProperty("mandatory", true)	
-			} else {
-				parameter_json.addProperty("mandatory", false)
-			}
-			parameter_json.addProperty("displayName", parameter.name)
-			parameter_json.addProperty("entityTypeDisplayName", checkTypes(parameter.type))
-			parameter_json.addProperty("isList", false)
-			val prompt_key = "prompts"
-			val prompt_values = new JsonArray
-			for (prompt : parameter.abstractPrompts) {
-				for (word : prompt.abstractWords) {
-					prompt_values.add(word.name)
-				}
-			}
-			parameter_json.add(prompt_key, prompt_values)
-			values.add(parameter_json)
-		}
-		obj.add(key, values)
-	}
-	
-	def generateMessages(Intent intent, JsonObject object, Messages messages) {
+	def generateMessages(JsonObject object, Messages messages) {
 		val key = "messages"
 		val value = new JsonArray
 		val text_value = new JsonObject
@@ -269,23 +250,6 @@ class Lasr_langGenerator extends AbstractGenerator {
 		}
 		
 		text_array.add("text", array_of_messages)
-		text_value.add("text", text_array)
-		value.add(text_value)
-		object.add(key, value)
-	}
-	
-	def generateMessages(AbstractIntent abstractIntent, JsonObject object, AbstractMessages abstractMessages) {
-		val key = "messages"
-		val value = new JsonArray
-		val text_value = new JsonObject
-		val text_array = new JsonObject
-		val array_of_abstractMessages = new JsonArray
-		
-		for (aMessage : abstractMessages.abstractMessages) {
-			array_of_abstractMessages.add(aMessage.name)
-		}
-		
-		text_array.add("text", array_of_abstractMessages)
 		text_value.add("text", text_array)
 		value.add(text_value)
 		object.add(key, value)
