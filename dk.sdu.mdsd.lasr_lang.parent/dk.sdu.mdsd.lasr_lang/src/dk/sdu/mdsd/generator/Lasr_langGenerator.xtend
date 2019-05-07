@@ -23,6 +23,7 @@ import dk.sdu.mdsd.lasr_lang.Messages
 import dk.sdu.mdsd.lasr_lang.AbstractIntent
 import java.util.HashMap
 import dk.sdu.mdsd.lasr_lang.Parameter
+import dk.sdu.mdsd.lasr_lang.Phrase
 
 /**
  * Generates code from your model files on save.
@@ -45,7 +46,6 @@ class Lasr_langGenerator extends AbstractGenerator {
 		
 		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
 		resource.allContents.filter(Intent).forEach[generateIntentJSON(intents) findAbstractIntents()]
-		//resource.allContents.filter(AbstractIntent).forEach[findAbstractIntents()]
 		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypes)]
 		
 		
@@ -127,7 +127,15 @@ class Lasr_langGenerator extends AbstractGenerator {
 	def appendAbstractIntentJSON(Intent intent, JsonObject objToExtend) {
 		val aIntent = abstractIntents.get(intent.ai.name)
 		for (aValue : aIntent.abstractValues) {
-			if (aValue instanceof Parameters) {
+			if (aValue instanceof TrainingPhrases) {
+				if (objToExtend.getAsJsonArray("trainingPhrases") === null) {
+					objToExtend.add("trainingPhrases", new JsonArray)
+				} 
+				val phrases = objToExtend.getAsJsonArray("trainingPhrases")
+				for (phrase: aValue.phrases) {
+					phrases.add(appendTrainingPhrases(aIntent, objToExtend, phrase))
+				}	
+			} else if (aValue instanceof Parameters) {
 				if (objToExtend.getAsJsonArray("parameters") === null) {
 					objToExtend.add("parameters", new JsonArray)
 				} 
@@ -143,6 +151,30 @@ class Lasr_langGenerator extends AbstractGenerator {
 				}
 			}
 		}
+	}
+	
+	def appendTrainingPhrases(AbstractIntent aIntent, JsonObject object, Phrase phrase) {
+		val entry_phrase = new JsonObject
+			val parts_key = "parts"
+			val parts = new JsonArray
+			for (part : phrase.sentences) {
+				val json_part = new JsonObject
+				val part_text_key = "text"
+				var part_text_value = new String()
+				if (part.entity !== null) {
+					val entity_type_value = checkTypes(part.entity)
+					json_part.addProperty("entityType", entity_type_value)
+					json_part.addProperty("alias", part.entity)
+					json_part.addProperty("userDefined", "true")
+				}
+				for (word : part.words) {
+					part_text_value = " " + word.name + " "
+				}
+				json_part.addProperty(part_text_key, part_text_value)
+				parts.add(json_part)
+			}
+			entry_phrase.add(parts_key, parts)
+		return entry_phrase
 	}
 	
 	def appendParameter(AbstractIntent intent, JsonObject object, Parameter parameter) {
