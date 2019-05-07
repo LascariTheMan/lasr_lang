@@ -86,55 +86,7 @@ Messages:
 
 // AbstractIntent -----------------------------------------------------------------------------------------------------------------
 AbstractIntent:
-	'abstract' 'intent' name = ID '{' abstractValues+=AbstractIntentValue* '}'
-;
-
-AbstractIntentValue:
-	aiv=AbstractIntentOptional
-;
-
-AbstractIntentOptional:
-	AbstractList | AbstractKeyValue
-;
-
-AbstractKeyValue:
-	v='action' ':' name=ID
-;
-
-AbstractList:
-	AbstractTrainingPhrases | AbstractParameters | AbstractMessages
-;
-
-AbstractTrainingPhrases:
-	v='trainingPhrases' '{' abstractPhrases+=AbstractPhrase+'}'
-;
-
-AbstractPhrase:
-	'phrase' ':' sentences+=AbstractSentence(',' abstractSentences+=AbstractSentence)*
-;
-
-AbstractSentence:
-	{AbstractSentence} (abstractWords+=AbstractWords)+ ('('entity=ID')')?
-;
-
-AbstractWords:
-	name = STRING
-;
-
-AbstractParameters:
-	{AbstractParameters} v='parameters' '{'abstractParameters+=AbstractParameter*'}'
-;
-
-AbstractParameter:
-	req=('required')? 'parameter' name=ID '{' 'entityType' ':' type=ID  abstractPrompts+=AbstractPrompt* '}'
-;
-
-AbstractPrompt:
-	{AbstractPrompt} ('prompt' ':' (abstractWords+=AbstractWords(',' abstractWords+=AbstractWords)*)+)
-;
-
-AbstractMessages:
-	{AbstractMessages} v='messages' '{' abstractMessages+=AbstractWords(',' abstractMessages+=AbstractWords)* '}'
+	'abstract' 'intent' name = ID '{' abstractValues+=List* '}'
 ;
 
 // EntityType ---------------------------------------------------------------------------------------------------------------------
