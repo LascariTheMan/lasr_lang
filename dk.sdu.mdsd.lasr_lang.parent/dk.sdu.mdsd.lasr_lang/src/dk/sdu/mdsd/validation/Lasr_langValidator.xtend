@@ -18,6 +18,9 @@ import dk.sdu.mdsd.lasr_lang.Sentence
 import dk.sdu.mdsd.lasr_lang.TrainingPhrases
 import dk.sdu.mdsd.lasr_lang.Words
 import org.eclipse.xtext.validation.Check
+import dk.sdu.mdsd.lasr_lang.AbstractIntent
+import java.util.ArrayList
+import java.util.HashMap
 
 /**
  * This class contains custom validation rules. 
@@ -41,12 +44,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	public static val IF_REQUIRED_PARAM_THEN_PROMPT = 'requiredParameterMustContainPrompt'
 	public static val PROMPT_STRING_SHOULD_NOT_BE_EMPTY = 'promptStringShouldNotBeEmpty'
 	public static val PHRASE_STRING_SHOULD_NOT_BE_EMPTY = 'phraseStringShouldNotBeEmpty'
+	public static val INJECTIONS_NOT_FULFILLED = 'injectionsNotFulfilled'
 	public static val MESSAGE_STRING_SHOULD_NOT_BE_EMPTY = 'messageStringShouldNotBeEmpty'
 	public static val MISSING_INTENT_DISPLAYNAME = 'missingIntentDisplayName'
 	public static val DUPLICATE_ENTRY = 'duplicateEntryError'
 	public static val IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED = 'missingPhrasesWhenTrainingPhrasesFieldisDef'
 	public static val IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT = 'absentTrainingPhrasesOrMessageDefintion'
 	
+	val toFind = "%"
+	val listOfInjections = new HashMap<String, ArrayList<String>>
 	public val lit = Lasr_langPackage.eINSTANCE
 	
 	/**
@@ -238,6 +244,73 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 					lit.getSentence_Words,
 					PHRASE_STRING_SHOULD_NOT_BE_EMPTY
 				)
+			}
+		}
+	}
+	
+	@Check
+	def noInjectionsForExtension(AbstractIntent aIntent) {
+		listOfInjections.clear
+		for (aValue : aIntent.values) {
+			if (aValue instanceof Messages) {
+				searchForInjections(aValue, aIntent)
+			} else if (aValue instanceof TrainingPhrases) {
+				searchForInjections(aValue, aIntent)
+			}
+		}
+	}
+	
+	@Check
+	def necessaryInjectionAreAdded(Intent intent) {
+		val list = listOfInjections.get(intent.toExtend)
+		for (injection : intent.injections) {
+			if(!list.contains(injection)) {
+				warning("Some injections have not been fulfilled",
+					lit.intent_Injections,
+					INJECTIONS_NOT_FULFILLED
+				)
+			}
+		}
+	}
+	
+	def searchForInjections(Messages messages, AbstractIntent aIntent) {
+		for (message : messages.messages) {
+			var fromIndex = 0
+			while ((fromIndex = message.name.indexOf(toFind, fromIndex)) != -1 ) {
+	            var endOfWord = message.name.indexOf(" ", fromIndex)
+	            if (endOfWord === -1) {
+					endOfWord = message.name.length
+				}
+				val injection = message.name.substring(fromIndex+1, endOfWord)
+				if (listOfInjections.get(aIntent.name) === null) {
+					listOfInjections.put(aIntent.name, new ArrayList)
+				}
+				val list = listOfInjections.get(aIntent.name)
+				list.add(injection)
+	            fromIndex++
+        	}
+		}
+	}
+	
+	def searchForInjections(TrainingPhrases trainingPhrases, AbstractIntent aIntent) {
+		for (phrases : trainingPhrases.phrases) {
+			for (sentence : phrases.sentences) {
+				for (words : sentence.words) {
+					var fromIndex = 0
+					while ((fromIndex = words.name.indexOf(toFind, fromIndex)) != -1 ) {
+			            var endOfWord = words.name.indexOf(" ", fromIndex)
+			            if (endOfWord === -1) {
+							endOfWord = words.name.length
+						}
+						val injection = words.name.substring(fromIndex+1, endOfWord)
+						if (listOfInjections.get(aIntent.name) === null) {
+							listOfInjections.put(aIntent.name, new ArrayList)
+						}
+						val list = listOfInjections.get(aIntent.name)
+						list.add(injection)
+			            fromIndex++
+		        	}					
+				}
 			}
 		}
 	}

@@ -4,28 +4,26 @@
 package dk.sdu.mdsd.generator
 
 import com.google.gson.FieldNamingPolicy
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import dk.sdu.mdsd.lasr_lang.AbstractIntent
 import dk.sdu.mdsd.lasr_lang.Agent
+import dk.sdu.mdsd.lasr_lang.EntityType
 import dk.sdu.mdsd.lasr_lang.Intent
 import dk.sdu.mdsd.lasr_lang.KeyValue
+import dk.sdu.mdsd.lasr_lang.Messages
+import dk.sdu.mdsd.lasr_lang.Parameter
 import dk.sdu.mdsd.lasr_lang.Parameters
+import dk.sdu.mdsd.lasr_lang.Phrase
 import dk.sdu.mdsd.lasr_lang.TrainingPhrases
+import java.util.ArrayList
+import java.util.HashMap
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import dk.sdu.mdsd.lasr_lang.EntityType
-import java.util.ArrayList
-import com.google.gson.Gson
-import dk.sdu.mdsd.lasr_lang.Messages
-import java.util.HashMap
-import dk.sdu.mdsd.lasr_lang.AbstractIntent
-import dk.sdu.mdsd.lasr_lang.Parameter
-import dk.sdu.mdsd.lasr_lang.List
-import dk.sdu.mdsd.lasr_lang.Words
-import dk.sdu.mdsd.lasr_lang.Phrase
 
 /**
  * Generates code from your model files on save.
