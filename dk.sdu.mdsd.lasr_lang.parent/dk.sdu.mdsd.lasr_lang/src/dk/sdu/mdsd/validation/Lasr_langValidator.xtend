@@ -18,6 +18,8 @@ import dk.sdu.mdsd.lasr_lang.Sentence
 import dk.sdu.mdsd.lasr_lang.TrainingPhrases
 import dk.sdu.mdsd.lasr_lang.Words
 import org.eclipse.xtext.validation.Check
+import dk.sdu.mdsd.lasr_lang.VirtualIntent
+import dk.sdu.mdsd.lasr_lang.Phrase
 
 /**
  * This class contains custom validation rules. 
@@ -27,16 +29,8 @@ import org.eclipse.xtext.validation.Check
 class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	public static val INVALID_NAME = 'invalidName'
-	public static val MISSING_AGENT_PARENT = 'missingAgentParent'
-	public static val MISSING_AGENT_DISPLAYNAME = 'missingAgentDisplayName'
-	public static val MISSING_AGENT_DEFAULTLANGUAGECODE = 'missingAgentDefaultLanguageCode'
-	public static val MISSING_AGENT_TIMEZONE = 'missingAgentTimezone'
-	public static val MISSING_AGENT_ENABLELOGGING = 'missingAgentEnableLogging'
-	public static val TYPEMISMATCH_AGENT_PARENT = 'typeMismatchAgentEnableLogging'
-	public static val TYPEMISMATCH_AGENT_DISPLAYNAME = 'typeMismatchAgentEnableLogging'
-	public static val TYPEMISMATCH_AGENT_DEFAULTLANGUAGECODE = 'typeMismatchAgentEnableLogging'
-	public static val TYPEMISMATCH_AGENT_TIMEZONE = 'typeMismatchAgentEnableLogging'
-	public static val TYPEMISMATCH_AGENT_ENABLELOGGING = 'typeMismatchAgentEnableLogging'
+	public static val MISSING_AGENT_PARAM = 'missingAgentParam'
+	public static val TYPEMISMATCH_AGENT = 'typeMismatchAgent'
 	public static val ONLY_ONE_AGENT_ALLOWED = 'onlyOneAgentInstanceIsAllowed'
 	public static val IF_REQUIRED_PARAM_THEN_PROMPT = 'requiredParameterMustContainPrompt'
 	public static val PROMPT_STRING_SHOULD_NOT_BE_EMPTY = 'promptStringShouldNotBeEmpty'
@@ -62,25 +56,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	def checkIfAgentParamsAreMissing(Agent agent) {
 		checkAgentParams(agent)
 	}
-	
-	/**
-   * Checks if '<em><b>AgentValues</b></em>' parameters are UpperCase.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	@Check
-	def checkIfAgentParamsAreUpper(AgentValue av) {
-		if (!Character.isUpperCase(av.value.v.name.charAt(0))) {
-        warning('Agent attributes should start with a capital', av.value.v, 
-                lit.getValueName_Name,
-                INVALID_NAME)
-    	}
-	}
-	
+
 	/**
    * Checks if '<em><b>AgentValues</b></em>' parameters are allowed, i.e the agent value "parent" =/= boolean.
    * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
@@ -140,8 +116,8 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
    */
 	@Check
 	def promptStringShouldNotBeEmpty(Prompt p) {
-		for(Words w : p.words) {			
-			if("".equals(w.name)) {
+		for(words : p.words) {			
+			if("".equals(words.name)) {
 				warning("A prompt should not be empty",
 					lit.getPrompt_Words,
 					PROMPT_STRING_SHOULD_NOT_BE_EMPTY
@@ -161,8 +137,8 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
    */
 	@Check
 	def messageStringShouldNotBeEmpty(Messages m) {
-		for(Words w : m.messages) {			
-			if("".equals(w.name)) {
+		for(words : m.messages) {			
+			if("".equals(words.name)) {
 				warning("A message should not be empty",
 					lit.getMessages_Messages,
 					MESSAGE_STRING_SHOULD_NOT_BE_EMPTY
@@ -172,8 +148,8 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	}
 	
 	/**
-   * Checks if '<em><b>Messages</b></em>' or '<em><b>TrainingPhrases</b></em>' are absent, and if so, gives a warning.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Intent}.
+   * Checks if '<em><b>Messages</b></em>' or '<em><b>TrainingPhrases</b></em>' are absent in the defined '<em><b>Intent</b></em>'.
+   * The parameter is of type {@link dk.sdu.mdsd.lasr_lang.Intent}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -183,20 +159,51 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	@Check
 	def ifTrainingPhrasesOrMessagesAreAbsent(Intent i) {
 		val iVals = newArrayList
-		for(var j = 0 ; j < i.values.length ; j++) {
-			iVals.add(i.values.get(j).iv.v)
+			if(i.vi === null) { 
+				for(var j = 0 ; j < i.values.length ; j++) {
+				iVals.add(i.values.get(j).iv.v)
+			}
+			if(!iVals.contains('trainingPhrases')) {
+				warning("This intent won't know much without a few training phrases",
+					lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+				)
+			}
+			if(!iVals.contains('messages')) {
+				warning("This intent won't respond with anything without a few messages",
+					lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+				)
+			}
+		}
+	}
+	
+	/**
+   * Checks if '<em><b>Messages</b></em>' or '<em><b>TrainingPhrases</b></em>' are absent in the defined '<em><b>AbstractIntent</b></em>'
+   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Intent}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
+	@Check
+	def ifTrainingPhrasesOrMessagesAreAbsent(VirtualIntent aIntent) {
+		val iVals = newArrayList			
+		for(var i = 0 ; i < aIntent.virtualValues.length ; i++) {
+			iVals.add(aIntent.virtualValues.get(i).v)
 		}
 		if(!iVals.contains('trainingPhrases')) {
-			warning("This intent won't know much without a few training phrases",
-				lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+			warning("The intents extending this template won't know much without a few training phrases",
+				lit.getVirtualIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
 			)
 		}
 		if(!iVals.contains('messages')) {
-			warning("This intent won't respond with anything without a few messages",
-				lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+			warning("The intents extending this template won't respond with anything without a few messages",
+				lit.getVirtualIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
 			)
 		}
 	}
+	
+	
 	/*
 	@Check
 	def ifEntityIsDefinedInPhraseThenDefineInParameter(List l) {
@@ -232,7 +239,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
    */
 	@Check
 	def phraseStringShouldNotBeEmpty(Sentence s) {
-		for(Words w : s.words) {			
+		for(w : s.words) {			
 			if("".equals(w.name)) {
 				warning("A phrase should not be empty",
 					lit.getSentence_Words,
@@ -254,7 +261,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	@Check
 	def checkIntentHasOnlyOneOfEachParam(Intent intent) {
 		val intentValSet = newHashSet
-			for (IntentValue v : intent.values) {
+			for (v : intent.values) {
 				if(!intentValSet.add(v.iv.v)){
 					error("Duplicate entry", v.iv, null, DUPLICATE_ENTRY + " : "+ v.iv)
 				}
@@ -273,7 +280,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	@Check
 	def checkNoIntentsWithSameName(Model m) {
 		val intentNames = newHashSet
-			for (Intent i : m.intents) {
+			for (i : m.intents) {
 				if(!intentNames.add(i.name)){
 					error("Duplicate intent", i, null, DUPLICATE_ENTRY + " : "+ i.name)
 				}
@@ -292,7 +299,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	@Check
 	def checkNoEntityWithSameName(Model m) {
 		val entityNames = newHashSet
-			for (EntityType e : m.entitytypes) {
+			for (e : m.entitytypes) {
 				if(!entityNames.add(e.name)){
 					error("Duplicate entity", e, null, DUPLICATE_ENTRY + " : "+ e.name)
 				}
@@ -311,7 +318,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	@Check
 	def checkNoParametersWithSameName(Parameters p) {
 		val parameterNames = newHashSet
-			for (Parameter pm : p.parameters) {
+			for (pm : p.parameters) {
 				if(!parameterNames.add(pm.name)){
 					error("Duplicate parameter", pm, null, DUPLICATE_ENTRY + " : "+ pm.name)
 				}
@@ -352,27 +359,27 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 			if(agentVal.aa == "parent") {
 				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
 					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_PARENT)
+					TYPEMISMATCH_AGENT + agentVal.aa)
 			}
 			if(agentVal.aa == "displayName") {
 				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
 					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_DISPLAYNAME)
+					TYPEMISMATCH_AGENT + agentVal.aa)
 			}
 			if(agentVal.aa == "defaultLanguageCode") {
 				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
 					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_DEFAULTLANGUAGECODE)
+					TYPEMISMATCH_AGENT + agentVal.aa)
 			}
 			if(agentVal.aa == "timezone") {
 				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
 					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_TIMEZONE)
+					TYPEMISMATCH_AGENT + agentVal.aa)
 			}
 			if(agentVal.aa == "enableLogging" && (agentVal.value.v.name !== 'true' || agentVal.value.v.name !== 'false')) {
 				error('Type mismatch:  '+ agentVal.aa + ' cannot be set to ' +agentVal.value.v.name.class.typeName, 
 					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_ENABLELOGGING)
+					TYPEMISMATCH_AGENT + agentVal.aa)
 			}	
 		}
 		
@@ -396,23 +403,23 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		if (!agentValues.contains('parent')) {
 			error('You must define the parent variable', 
 					null,
-					MISSING_AGENT_PARENT)
+					MISSING_AGENT_PARAM + 'parent')
 		} else if (!agentValues.contains('displayName')) {
 			error('You must define the displayName variable', 
 					null,
-					MISSING_AGENT_DISPLAYNAME)
+					MISSING_AGENT_PARAM + 'displayName')
 		} else if (!agentValues.contains('defaultLanguageCode')) {
 			error('You must define the defaultLanguageCode variable', 
 					null,
-					MISSING_AGENT_DEFAULTLANGUAGECODE)
+					MISSING_AGENT_PARAM + 'defaultLanguageCode')
 		} else if (!agentValues.contains('timezone')) {
 			error('You must define the timezone variable', 
 					null,
-					MISSING_AGENT_TIMEZONE)
+					MISSING_AGENT_PARAM + 'timezone')
 		} else if (!agentValues.contains('enableLogging')) {
 			error('You must define the enableLogging variable', 
 					null,
-					MISSING_AGENT_ENABLELOGGING)
+					MISSING_AGENT_PARAM + 'enableLogging')
 		}
 	}
 }
