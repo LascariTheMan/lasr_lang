@@ -25,6 +25,7 @@ import dk.sdu.mdsd.lasr_lang.AbstractIntent
 import dk.sdu.mdsd.lasr_lang.Parameter
 import dk.sdu.mdsd.lasr_lang.List
 import dk.sdu.mdsd.lasr_lang.Words
+import dk.sdu.mdsd.lasr_lang.Phrase
 
 /**
  * Generates code from your model files on save.
@@ -37,6 +38,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	val stringTypes = new StringTypes
 	val abstractIntents = new HashMap<String, AbstractIntent>()
 	val definedInjections = new HashMap<String, String>()
+	val toFind = "%"
 	
 	/**
 	 * Called when saving DSL.
@@ -144,7 +146,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 				value = raw_value.name
 				obj.addProperty(key, value.toString)
 			} else if (raw_value instanceof TrainingPhrases) {
-				generateTrainingPhrases(intent, obj, raw_value)			
+				generateTrainingPhrases(obj, raw_value)			
 			} else if (raw_value instanceof Parameters) {
 				generateParameters(intent, obj, raw_value)
 			} else if (raw_value instanceof Messages) {
@@ -152,6 +154,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 			}
 		}
 		if (intent.toExtend !== null && abstractIntents.containsKey(intent.toExtend)) {
+			definedInjections.clear
 			addDefinedInjections(intent)
 			appendAbstractIntent(intent, obj)
 		}
@@ -159,7 +162,9 @@ class Lasr_langGenerator extends AbstractGenerator {
 	}
 	
 	def addDefinedInjections(Intent intent) {
-		
+		for (injection : intent.injections) {
+			definedInjections.put(injection.key, injection.value)
+		}
 	}
 	
 	def appendAbstractIntent(Intent intent, JsonObject obj) {
@@ -174,34 +179,57 @@ class Lasr_langGenerator extends AbstractGenerator {
 					parameters.add(appendParameter(aIntent, obj, parameter))
 				}	
 			} else if (aValue instanceof Messages) {
-				handleInjections(intent, aValue)
+				searchForInjections(intent, aValue)
 				if (obj.getAsJsonArray("messages") === null) {
 					generateMessages(obj, aValue)
 				} else {
 					appendMessages(obj, aValue)
 				}
+			} else if (aValue instanceof TrainingPhrases) {
+				searchForInjections(intent, aValue)
+				if (obj.getAsJsonArray("messages") === null) {
+					generateTrainingPhrases(obj, aValue)
+				} else {
+					appendTrainingPhrases(obj, aValue)
+				}
 			}
 		}
 	}
 	
-	def handleInjections(Intent intent, Messages messages) {
-		val toFind = "%"
+	def searchForInjections(Intent intent, Messages messages) {
 		for (message : messages.messages) {
 			var fromIndex = 0
 			while ((fromIndex = message.name.indexOf(toFind, fromIndex)) != -1 ) {
-	            replaceWithWord(message.name, fromIndex)
+	            val newValue = replaceWithWord(message.name, fromIndex)
+	            message.name = newValue
 	            fromIndex++
         	}
 		}
 	}
 	
-	def replaceWithWord(String message, int fromIndex) {
-		val endOfWord = message.indexOf(" ", fromIndex)
-		val injection = message.substring(fromIndex+1, endOfWord)
-		var newValue = message.substring(0, fromIndex) + definedInjections.get(injection)
-		if (endOfWord !== -1) {	
-			newValue += message.substring(endOfWord)	
+	def searchForInjections(Intent intent, TrainingPhrases trainingPhrases) {
+		for (phrases : trainingPhrases.phrases) {
+			for (sentence : phrases.sentences) {
+				for (words : sentence.words) {
+					var fromIndex = 0
+					while ((fromIndex = words.name.indexOf(toFind, fromIndex)) != -1 ) {
+			            val newValue = replaceWithWord(words.name, fromIndex)
+			            words.name = newValue
+			            fromIndex++
+		        	}					
+				}
+			}
 		}
+	}
+	
+	def replaceWithWord(String message, int fromIndex) {
+		var endOfWord = message.indexOf(" ", fromIndex)
+		if (endOfWord === -1) {
+			endOfWord = message.length
+		}
+		val injection = message.substring(fromIndex+1, endOfWord)
+		var newValue = message.substring(0, fromIndex) + definedInjections.get(injection) + message.substring(endOfWord)
+		return newValue
 	}
 	
 	/**
@@ -213,34 +241,47 @@ class Lasr_langGenerator extends AbstractGenerator {
 	 * @param obj, the JSON object that is created for the whole intent. Is used to parse the final JSON array of training phrases. 
 	 * @param raw_value, the data given from the DSL to build the training phrases.  
 	 */
-	def generateTrainingPhrases(Intent intent, JsonObject obj, TrainingPhrases raw_value) {
+	def generateTrainingPhrases(JsonObject obj, TrainingPhrases raw_value) {
 		val key = "trainingPhrases"
 		val values = new JsonArray
 		for (phrase : raw_value.phrases) {
-			val entry_phrase = new JsonObject
-			val parts_key = "parts"
-			val parts = new JsonArray
-			for (part : phrase.sentences) {
-				val json_part = new JsonObject
-				val part_text_key = "text"
-				var part_text_value = new String()
-				if (part.entity !== null) {
-					val entity_type_value = checkTypes(part.entity)
-					json_part.addProperty("entityType", entity_type_value)
-					json_part.addProperty("alias", part.entity)
-					json_part.addProperty("userDefined", "true")
-				}
-				for (word : part.words) {
-					part_text_value = " " + word.name + " "
-				}
-				json_part.addProperty(part_text_key, part_text_value)
-				parts.add(json_part)
-			}
-			entry_phrase.add(parts_key, parts)
+			val entry_phrase = generateParts(obj, phrase)
 			values.add(entry_phrase)
 		}
 		obj.add(key, values)
 	} 
+	
+	def generateParts(JsonObject obj, Phrase phrase) {
+		val entry_phrase = new JsonObject
+		val parts_key = "parts"
+		val parts = new JsonArray
+		for (part : phrase.sentences) {
+			val json_part = new JsonObject
+			val part_text_key = "text"
+			var part_text_value = new String()
+			if (part.entity !== null) {
+				val entity_type_value = checkTypes(part.entity)
+				json_part.addProperty("entityType", entity_type_value)
+				json_part.addProperty("alias", part.entity)
+				json_part.addProperty("userDefined", "true")
+			}
+			for (word : part.words) {
+				part_text_value = " " + word.name + " "
+			}
+			json_part.addProperty(part_text_key, part_text_value)
+			parts.add(json_part)
+		}
+		entry_phrase.add(parts_key, parts)
+		return entry_phrase
+	}
+	
+	def appendTrainingPhrases(JsonObject obj, TrainingPhrases phrases) {
+		val trainingPhrases = obj.getAsJsonArray("trainingPhrases") as JsonArray
+		for (phrase : phrases.phrases) {
+			val entry_phrase = generateParts(obj, phrase)
+			trainingPhrases.add(entry_phrase)
+		}
+	}
 	
 	/**
 	 * Will map a entity string to a string that Dialogflow understands. 
@@ -314,7 +355,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	/**
 	 * Will generate a JSON array of messages, used for response to the user.  
 	 * 
-	 * @parram intent, the intent object from the DSL, which the JSON object is created of.
+	 * @param intent, the intent object from the DSL, which the JSON object is created of.
 	 * @param object, the JSON object that is created for the whole intent. Is used to parse the final array of messages to the intent. 
 	 * @param messages, the messages given from the DSL to build the response messages.  
 	 */
