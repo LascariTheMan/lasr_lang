@@ -20,7 +20,7 @@ import dk.sdu.mdsd.lasr_lang.EntityType
 import java.util.ArrayList
 import com.google.gson.Gson
 import dk.sdu.mdsd.lasr_lang.Messages
-import dk.sdu.mdsd.lasr_lang.AbstractIntent
+import dk.sdu.mdsd.lasr_lang.VirtualIntent
 import java.util.HashMap
 import dk.sdu.mdsd.lasr_lang.Parameter
 import dk.sdu.mdsd.lasr_lang.Phrase
@@ -34,7 +34,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	
 	val httpRequest = new HttpRequest
 	val stringTypes = new StringTypes
-	val abstractIntents = new HashMap<String, AbstractIntent>()
+	val virtualIntents = new HashMap<String, VirtualIntent>()
 	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create()
@@ -45,7 +45,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		val apikeyManager = new ApiKeyManager
 		
 		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
-		resource.allContents.filter(Intent).forEach[generateIntentJSON(intents) findAbstractIntents()]
+		resource.allContents.filter(Intent).forEach[generateIntentJSON(intents) findVirtualIntents()]
 		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypes)]
 		
 		
@@ -57,9 +57,9 @@ class Lasr_langGenerator extends AbstractGenerator {
 		createIntentsAndEntityTypes(intents, entityTypes, gson)
 	}
 	
-	def findAbstractIntents(Intent intent) {
-		if(intent.ai !== null) {
-			abstractIntents.put(intent.ai.name, intent.ai)	
+	def findVirtualIntents(Intent intent) {
+		if(intent.vi !== null) {
+			virtualIntents.put(intent.vi.name, intent.vi)	
 		}
 	}
 	
@@ -118,15 +118,15 @@ class Lasr_langGenerator extends AbstractGenerator {
 				generateMessages(obj, raw_value)
 			}
 		}
-		if(intent.ai !== null && abstractIntents.containsKey(intent.ai.name)) {
-			appendAbstractIntentJSON(intent, obj)
+		if(intent.vi !== null && virtualIntents.containsKey(intent.vi.name)) {
+			appendVirtualIntentJSON(intent, obj)
 		}
 		intents.add(obj)
 	}
 	 
-	def appendAbstractIntentJSON(Intent intent, JsonObject objToExtend) {
-		val aIntent = abstractIntents.get(intent.ai.name)
-		for (aValue : aIntent.abstractValues) {
+	def appendVirtualIntentJSON(Intent intent, JsonObject objToExtend) {
+		val aIntent = virtualIntents.get(intent.vi.name)
+		for (aValue : aIntent.virtualValues) {
 			if (aValue instanceof TrainingPhrases) {
 				if (objToExtend.getAsJsonArray("trainingPhrases") === null) {
 					objToExtend.add("trainingPhrases", new JsonArray)
@@ -153,7 +153,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		}
 	}
 	
-	def appendTrainingPhrases(AbstractIntent aIntent, JsonObject object, Phrase phrase) {
+	def appendTrainingPhrases(VirtualIntent aIntent, JsonObject object, Phrase phrase) {
 		val entry_phrase = new JsonObject
 			val parts_key = "parts"
 			val parts = new JsonArray
@@ -177,7 +177,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		return entry_phrase
 	}
 	
-	def appendParameter(AbstractIntent intent, JsonObject object, Parameter parameter) {
+	def appendParameter(VirtualIntent intent, JsonObject object, Parameter parameter) {
 		val parameter_json = new JsonObject
 		if (parameter.req !== null) {
 			parameter_json.addProperty("mandatory", true)	
