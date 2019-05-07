@@ -8,6 +8,14 @@ import org.eclipse.xtext.ui.editor.quickfix.Fix
 import dk.sdu.mdsd.validation.Lasr_langValidator
 import org.eclipse.xtext.validation.Issue
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
+import dk.sdu.mdsd.lasr_lang.Prompt
+import dk.sdu.mdsd.lasr_lang.Parameter
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.ui.editor.model.edit.IModificationContext
+import dk.sdu.mdsd.lasr_lang.Lasr_langFactory
+import dk.sdu.mdsd.lasr_lang.Model
+import dk.sdu.mdsd.lasr_lang.TrainingPhrases
+import dk.sdu.mdsd.lasr_lang.Words
 
 /**
  * Custom quickfixes.
@@ -16,13 +24,29 @@ import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
  */
 class Lasr_langQuickfixProvider extends DefaultQuickfixProvider {
 
-	@Fix(Lasr_langValidator.INVALID_NAME)
-	def decapitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
-		acceptor.accept(issue, 'Decapitalize name', 'Decapitalize the name.', 'upcase.png') [
-			context |
-			val xtextDocument = context.xtextDocument
-			val firstLetter = xtextDocument.get(issue.offset, 1)
-			xtextDocument.replace(issue.offset, 1, firstLetter.toLowerCase)
+	@Fix(Lasr_langValidator.IF_REQUIRED_PARAM_THEN_PROMPT)
+	def addPromptToReqParameter(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Add Prompts', 'Add Prompts to: ', 'upcase.png') [
+			element, context |
+			(element as Parameter).prompts.add(Lasr_langFactory::eINSTANCE.createPrompt() => [
+				words.add(Lasr_langFactory::eINSTANCE.createWords() => [name=""])
+				]
+			)
+		]
+	}
+	
+	@Fix(Lasr_langValidator.IF_REQUIRED_PARAM_THEN_PROMPT)
+	def makeParameterNonRequired(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Make parameter "non required"', 'Make parameter "non required"', 'upcase.png') [
+			element, context |
+			(element as Parameter).req = null
 		]
 	}
 }
+
+/*
+ * 			context |
+			val xtextDocument = context.xtextDocument
+			val firstLetter = xtextDocument.get(issue.offset, 1)
+			xtextDocument.replace(issue.offset, 1, firstLetter.toLowerCase)
+ */
