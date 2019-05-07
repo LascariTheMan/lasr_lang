@@ -5,9 +5,7 @@ package dk.sdu.mdsd.validation
 
 import dk.sdu.mdsd.lasr_lang.Agent
 import dk.sdu.mdsd.lasr_lang.AgentValue
-import dk.sdu.mdsd.lasr_lang.EntityType
 import dk.sdu.mdsd.lasr_lang.Intent
-import dk.sdu.mdsd.lasr_lang.IntentValue
 import dk.sdu.mdsd.lasr_lang.Lasr_langPackage
 import dk.sdu.mdsd.lasr_lang.Messages
 import dk.sdu.mdsd.lasr_lang.Model
@@ -16,10 +14,8 @@ import dk.sdu.mdsd.lasr_lang.Parameters
 import dk.sdu.mdsd.lasr_lang.Prompt
 import dk.sdu.mdsd.lasr_lang.Sentence
 import dk.sdu.mdsd.lasr_lang.TrainingPhrases
-import dk.sdu.mdsd.lasr_lang.Words
-import org.eclipse.xtext.validation.Check
 import dk.sdu.mdsd.lasr_lang.VirtualIntent
-import dk.sdu.mdsd.lasr_lang.Phrase
+import org.eclipse.xtext.validation.Check
 
 /**
  * This class contains custom validation rules. 
@@ -45,7 +41,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	/**
    * Checks if any '<em><b>Agent</b></em>' parameters are missing.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
+   * The parameters are of type {@link AgentValue}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -59,7 +55,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 
 	/**
    * Checks if '<em><b>AgentValues</b></em>' parameters are allowed, i.e the agent value "parent" =/= boolean.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
+   * The parameters are of type {@link AgentValue}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -73,7 +69,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	/**
    * Checks if '<em><b>Parameter</b></em>' are required, and if so, that a prompt has been defined.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Parameter}.
+   * The parameters are of type {@link Parameter}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -91,7 +87,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	/**
    * Checks if '<em><b>TrainingPhrases</b></em>' are defined, and if so, that a phrase has been defined.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.TrainingPhrases}.
+   * The parameters are of type {@link TrainingPhrases}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -107,7 +103,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	/**
    * Checks if a '<em><b>Prompt</b></em>' is empty, and if so, gives a warning.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Prompt}.
+   * The parameters are of type {@link Prompt}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -128,7 +124,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	/**
    * Checks if a '<em><b>Message</b></em>' is empty, and if so, gives a warning.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Messages}.
+   * The parameters are of type {@link Messages}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -149,7 +145,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	/**
    * Checks if '<em><b>Messages</b></em>' or '<em><b>TrainingPhrases</b></em>' are absent in the defined '<em><b>Intent</b></em>'.
-   * The parameter is of type {@link dk.sdu.mdsd.lasr_lang.Intent}.
+   * The parameter is of type {@link Intent}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -178,7 +174,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	/**
    * Checks if '<em><b>Messages</b></em>' or '<em><b>TrainingPhrases</b></em>' are absent in the defined '<em><b>AbstractIntent</b></em>'
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Intent}.
+   * The parameters are of type {@link Intent}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -230,7 +226,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	 
 	 /**
    * Checks if a '<em><b>Phrase</b></em>' is empty, and if so, gives a warning.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Sentence}.
+   * The parameters are of type {@link Sentence}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -251,7 +247,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
    /**
    * Checks if a '<em><b>Intent</b></em>' has no duplicate entries.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Intent}.
+   * The parameters are of type {@link Intent}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -270,7 +266,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	 /**
    * Checks if the '<em><b>Model</b></em>' has no duplicate intents.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Model}.
+   * The parameters are of type {@link Model}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -289,7 +285,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	 /**
    * Checks if the '<em><b>Model</b></em>' has no duplicate entities.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Model}.
+   * The parameters are of type {@link Model}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -308,7 +304,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	 /**
    * Checks if a '<em><b>Parameters</b></em>' has no duplicate entries.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Parameters}.
+   * The parameters are of type {@link Parameters}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -327,7 +323,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	 /**
    * Checks if a '<em><b>Agent</b></em>' has no duplicate entries.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Agent}.
+   * The parameters are of type {@link Agent}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -346,7 +342,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	 /**
    * Checks if an '<em><b>AgentValue</b></em>' has no type mismatches.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
+   * The parameters are of type {@link AgentValue}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -387,7 +383,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	 /**
    * Checks if an '<em><b>Agent</b></em>' has no missing parameters.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Agent}.
+   * The parameters are of type {@link Agent}.
    * <!-- begin-user-doc -->
    * <p>
    * 
