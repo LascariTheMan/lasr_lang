@@ -3,7 +3,7 @@ grammar dk.sdu.mdsd.Lasr_lang with org.eclipse.xtext.common.Terminals
 generate lasr_lang "http://www.sdu.dk/mdsd/lasr_lang"
 
 Model:
-	abstractIntents+=AbstractIntent* intents+=Intent* entitytypes+=EntityType*
+	virtualIntents+=VirtualIntent* intents+=Intent* entitytypes+=EntityType*
 ;
 
 Agent:
@@ -33,7 +33,7 @@ Bool:
 
 // Intents----------------------------------------------------------------------------------------------------------------
 Intent:
-	{Intent} 'Intent' name=ID (':' ai=[AbstractIntent])? '{'values+=IntentValue*'}'
+	{Intent} 'Intent' name=ID (':' vi=[VirtualIntent])? '{'values+=IntentValue*'}'
 ;
 
 IntentValue:
@@ -85,8 +85,8 @@ Messages:
 ;
 
 // AbstractIntent -----------------------------------------------------------------------------------------------------------------
-AbstractIntent:
-	'abstract' 'intent' name = ID '{' abstractValues+=List* '}'
+VirtualIntent:
+	'virtual' 'intent' name = ID '{' virtualValues+=List* '}'
 ;
 
 // EntityType ---------------------------------------------------------------------------------------------------------------------
