@@ -86,7 +86,7 @@ Messages:
 
 // AbstractIntent -----------------------------------------------------------------------------------------------------------------
 AbstractIntent:
-	'AbstractIntent' name = ID '{' abstractValues+=AbstractIntentValue* '}'
+	'abstract' 'intent' name = ID '{' abstractValues+=AbstractIntentValue* '}'
 ;
 
 AbstractIntentValue:
