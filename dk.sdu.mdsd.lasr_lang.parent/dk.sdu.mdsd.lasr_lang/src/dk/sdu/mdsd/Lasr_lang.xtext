@@ -53,7 +53,7 @@ List:
 ;
 
 TrainingPhrases:
-	v='trainingPhrases' '{' phrases+=Phrase+'}'
+	v='trainingPhrases' '{' phrases+=Phrase*'}'
 ;
 
 Phrase:
@@ -84,7 +84,7 @@ Messages:
 	{Messages} v='messages' '{' messages+=Words(',' messages+=Words)* '}'
 ;
 
-// AbstractIntent -----------------------------------------------------------------------------------------------------------------
+// VirtualIntent -----------------------------------------------------------------------------------------------------------------
 VirtualIntent:
 	'virtual' 'intent' name = ID '{' virtualValues+=List* '}'
 ;

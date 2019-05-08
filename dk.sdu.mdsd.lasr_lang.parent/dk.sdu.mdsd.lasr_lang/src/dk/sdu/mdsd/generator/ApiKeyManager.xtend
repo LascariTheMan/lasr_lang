@@ -15,7 +15,7 @@ class ApiKeyManager {
 		val reader2 = new BufferedReader(new InputStreamReader(pyproces.inputStream))
 		var python_path = reader2.readLine
 		 */
-		val pb = new ProcessBuilder("python", "getkey.py")
+		val pb = new ProcessBuilder("py", "getkey.py")
 		pb.directory(new File(FileLocator.resolve(class.classLoader.getResource('src/res/')).path))
 		
 		pb.redirectErrorStream(true)	
