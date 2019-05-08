@@ -16,6 +16,13 @@ import dk.sdu.mdsd.lasr_lang.Lasr_langFactory
 import dk.sdu.mdsd.lasr_lang.Model
 import dk.sdu.mdsd.lasr_lang.TrainingPhrases
 import dk.sdu.mdsd.lasr_lang.Words
+import dk.sdu.mdsd.lasr_lang.ui.internal.Lasr_langActivator
+import dk.sdu.mdsd.lasr_lang.Phrase
+import dk.sdu.mdsd.lasr_lang.Sentence
+import com.google.inject.spi.Message
+import dk.sdu.mdsd.lasr_lang.Messages
+import dk.sdu.mdsd.lasr_lang.Intent
+import dk.sdu.mdsd.lasr_lang.EntityType
 
 /**
  * Custom quickfixes.
@@ -40,6 +47,78 @@ class Lasr_langQuickfixProvider extends DefaultQuickfixProvider {
 		acceptor.accept(issue, 'Make parameter "non required"', 'Make parameter "non required"', 'upcase.png') [
 			element, context |
 			(element as Parameter).req = null
+		]
+	}
+	
+	@Fix(Lasr_langValidator.PROMPT_STRING_SHOULD_NOT_BE_EMPTY)
+	def fixEmptyPromptString(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Add template for prompt', "Adds a default prompt text", 'upcase.png') [
+			element, context |
+			(element as Prompt).words.get(0).name = "Sorry! I missed what you said, can you repeat?"
+		]
+	}
+	
+	@Fix(Lasr_langValidator.PHRASE_STRING_SHOULD_NOT_BE_EMPTY)
+	def fixEmptyPhraseString(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Add template for phrase', "Adds a default phrase text", 'upcase.png') [
+			element, context |
+			(element as Sentence).words.get(0).name = ("Can i please ... ?")
+		]
+	}
+	 
+	
+	@Fix(Lasr_langValidator.MESSAGE_STRING_SHOULD_NOT_BE_EMPTY)
+	def fixEmptyMessageString(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Add template for response message', "Adds a default message text", 'upcase.png') [
+			element, context |
+			(element as Messages).messages.get(0).name = ("Thank you for using our service!")
+		]
+	}
+	
+	@Fix(Lasr_langValidator.DUPLICATE_INTENT)
+	def removeDuplicateIntent(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Remove duplicate intent', "Removes the duplicate intent", 'upcase.png') [
+			element, context |
+			val xtextDocument = context.xtextDocument
+			xtextDocument.replace(issue.offset, issue.length,"")
+		]
+	}
+	
+	@Fix(Lasr_langValidator.DUPLICATE_INTENT)
+	def changeDuplicateIntentName(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Change intent name', "Changes the intent name", 'upcase.png') [
+			element, context |
+			val iName = (element as Intent).name
+			val xtextDocument = context.xtextDocument
+			xtextDocument.replace(issue.offset + 7, iName.length, "_" + iName)
+		]
+	}
+	
+	@Fix(Lasr_langValidator.DUPLICATE_INTENT_PARAMS)
+	def removeDuplicateIntentParam(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Remove duplicate entry', "Removes the duplicate entry", 'upcase.png') [
+			element, context |
+			val xtextDocument = context.xtextDocument
+			xtextDocument.replace(issue.offset, issue.length,"")
+		]
+	}
+	
+	@Fix(Lasr_langValidator.DUPLICATE_ENTITY)
+	def removeDuplicateEntity(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Remove duplicate entity', "Removes the duplicate entity", 'upcase.png') [
+			element, context |
+			val xtextDocument = context.xtextDocument
+			xtextDocument.replace(issue.offset, issue.length,"")
+		]
+	}
+	
+	@Fix(Lasr_langValidator.DUPLICATE_ENTITY)
+	def changeDuplicateEntityName(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Change entity name', "Changes the entity name", 'upcase.png') [
+			element, context |
+			val eName = (element as EntityType).name
+			val xtextDocument = context.xtextDocument
+			xtextDocument.replace(issue.offset + 11, eName.length, "_" + eName)
 		]
 	}
 }
