@@ -32,8 +32,11 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	public static val PROMPT_STRING_SHOULD_NOT_BE_EMPTY = 'promptStringShouldNotBeEmpty'
 	public static val PHRASE_STRING_SHOULD_NOT_BE_EMPTY = 'phraseStringShouldNotBeEmpty'
 	public static val MESSAGE_STRING_SHOULD_NOT_BE_EMPTY = 'messageStringShouldNotBeEmpty'
-	public static val MISSING_INTENT_DISPLAYNAME = 'missingIntentDisplayName'
-	public static val DUPLICATE_ENTRY = 'duplicateEntryError'
+	public static val DUPLICATE_INTENT = 'duplicateIntent'
+	public static val DUPLICATE_INTENT_PARAMS = 'duplicateIntentParams'
+	public static val DUPLICATE_ENTITY = 'duplicateEntity'
+	public static val DUPLICATE_PARAMETER = 'duplicateParameter'
+	public static val DUPLICATE_AGENT_PARAMS = 'duplicateAgent'
 	public static val IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED = 'missingPhrasesWhenTrainingPhrasesFieldisDef'
 	public static val IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT = 'absentTrainingPhrasesOrMessageDefintion'
 	
@@ -259,7 +262,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		val intentValSet = newHashSet
 			for (v : intent.values) {
 				if(!intentValSet.add(v.iv.v)){
-					error("Duplicate entry", v.iv, null, DUPLICATE_ENTRY + " : "+ v.iv)
+					error("Duplicate intent entry", v, null, DUPLICATE_INTENT_PARAMS)
 				}
 			}
 		}		
@@ -278,7 +281,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		val intentNames = newHashSet
 			for (i : m.intents) {
 				if(!intentNames.add(i.name)){
-					error("Duplicate intent", i, null, DUPLICATE_ENTRY + " : "+ i.name)
+					error("Duplicate intent", i, null, DUPLICATE_INTENT)
 				}
 			}
 		}		
@@ -297,7 +300,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		val entityNames = newHashSet
 			for (e : m.entitytypes) {
 				if(!entityNames.add(e.name)){
-					error("Duplicate entity", e, null, DUPLICATE_ENTRY + " : "+ e.name)
+					error("Duplicate entity", e, null, DUPLICATE_ENTITY)
 				}
 			}
 		}
@@ -316,7 +319,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		val parameterNames = newHashSet
 			for (pm : p.parameters) {
 				if(!parameterNames.add(pm.name)){
-					error("Duplicate parameter", pm, null, DUPLICATE_ENTRY + " : "+ pm.name)
+					error("Duplicate parameter", pm, null, DUPLICATE_PARAMETER)
 				}
 			}
 		}
@@ -335,7 +338,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		val agentValSet = newHashSet
 		for(var i = 0 ; i < a.values.length ; i++) {
 			if(!agentValSet.add(a.values.get(i).aa)){
-				error("Duplicate entry", a.values.get(i), null, DUPLICATE_ENTRY + " : "+ a.values.get(i))
+				error("Duplicate entry", a.values.get(i), null, DUPLICATE_AGENT_PARAMS)
 			}
 		}		
 	}
