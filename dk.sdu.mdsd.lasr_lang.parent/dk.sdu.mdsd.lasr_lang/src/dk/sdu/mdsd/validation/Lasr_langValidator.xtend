@@ -53,6 +53,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	val toFind = "%"
 	val listOfInjections = new HashMap<String, ArrayList<String>>
+	val intentExtensions = new ArrayList<String>
 	public val lit = Lasr_langPackage.eINSTANCE
 	
 	/**
@@ -238,14 +239,12 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
    */
 	@Check
 	def phraseStringShouldNotBeEmpty(Sentence s) {
-		for(Words w : s.words) {			
-			if("".equals(w.name)) {
-				warning("A phrase should not be empty",
+		s.words.filter[it.name.empty].forEach[
+			warning("A phrase should not be empty",
 					lit.getSentence_Words,
 					PHRASE_STRING_SHOULD_NOT_BE_EMPTY
 				)
-			}
-		}
+		]
 	}
 	
 	@Check
@@ -262,10 +261,20 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	@Check
 	def necessaryInjectionAreAdded(Intent intent) {
+		intentExtensions.clear
 		val list = listOfInjections.get(intent.toExtend)
 		for (injection : intent.injections) {
-			if(!list.contains(injection)) {
-				warning("Some injections have not been fulfilled",
+			intentExtensions.add(injection.key)
+			if(!list.contains(injection.key)) {
+				warning("Your injections doesn't match with the defined injections in the abstract intent",
+					lit.intent_Injections,
+					INJECTIONS_NOT_FULFILLED
+				)
+			}
+		}
+		for (keyword : list) {
+			if(!intentExtensions.contains(keyword)) {
+				warning("You are missing some injections for the abstract intent you're extending",
 					lit.intent_Injections,
 					INJECTIONS_NOT_FULFILLED
 				)
