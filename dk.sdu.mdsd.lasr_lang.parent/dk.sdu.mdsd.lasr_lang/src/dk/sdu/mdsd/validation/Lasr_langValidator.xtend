@@ -38,7 +38,8 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	public static val DUPLICATE_PARAMETER = 'duplicateParameter'
 	public static val DUPLICATE_AGENT_PARAMS = 'duplicateAgent'
 	public static val IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED = 'missingPhrasesWhenTrainingPhrasesFieldisDef'
-	public static val IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT = 'absentTrainingPhrasesOrMessageDefintion'
+	public static val IF_TRAINING_PHRASES_ARE_ABSENT = 'absentTrainingPhrasesDefintion'
+	public static val IF_MESSAGES_ARE_ABSENT = 'absentMessageDefintion'
 	
 	public val lit = Lasr_langPackage.eINSTANCE
 	
@@ -147,7 +148,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	}
 	
 	/**
-   * Checks if '<em><b>Messages</b></em>' or '<em><b>TrainingPhrases</b></em>' are absent in the defined '<em><b>Intent</b></em>'.
+   * Checks if '<em><b>TrainingPhrases</b></em>' are absent in the defined '<em><b>Intent</b></em>'.
    * The parameter is of type {@link Intent}.
    * <!-- begin-user-doc -->
    * <p>
@@ -156,7 +157,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
    * <!-- end-user-doc -->
    */
 	@Check
-	def ifTrainingPhrasesOrMessagesAreAbsent(Intent i) {
+	def ifTrainingPhrasesAreAbsent(Intent i) {
 		val iVals = newArrayList
 			if(i.vi === null) { 
 				for(var j = 0 ; j < i.values.length ; j++) {
@@ -164,20 +165,15 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 			}
 			if(!iVals.contains('trainingPhrases')) {
 				warning("This intent won't know much without a few training phrases",
-					lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
-				)
-			}
-			if(!iVals.contains('messages')) {
-				warning("This intent won't respond with anything without a few messages",
-					lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+					lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_ARE_ABSENT
 				)
 			}
 		}
 	}
 	
 	/**
-   * Checks if '<em><b>Messages</b></em>' or '<em><b>TrainingPhrases</b></em>' are absent in the defined '<em><b>AbstractIntent</b></em>'
-   * The parameters are of type {@link Intent}.
+   * Checks if '<em><b>Messages</b></em>' are absent in the defined '<em><b>Intent</b></em>'.
+   * The parameter is of type {@link Intent}.
    * <!-- begin-user-doc -->
    * <p>
    * 
@@ -185,23 +181,63 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
    * <!-- end-user-doc -->
    */
 	@Check
-	def ifTrainingPhrasesOrMessagesAreAbsent(VirtualIntent aIntent) {
-		val iVals = newArrayList			
-		for(var i = 0 ; i < aIntent.virtualValues.length ; i++) {
-			iVals.add(aIntent.virtualValues.get(i).v)
+	def ifMessagesAreAbsent(Intent i) {
+		val iVals = newArrayList
+			if(i.vi === null) { 
+				for(var j = 0 ; j < i.values.length ; j++) {
+				iVals.add(i.values.get(j).iv.v)
+			}
+			if(!iVals.contains('messages')) {
+				warning("This intent won't respond with anything without a few messages",
+					lit.getIntent_Name, Lasr_langValidator.IF_MESSAGES_ARE_ABSENT
+				)
+			}
 		}
+	}
+	
+	/**
+   * Checks if '<em><b>TrainingPhrases</b></em>' are absent in the defined '<em><b>VirtualIntent</b></em>'.
+   * The parameter is of type {@link VirtualIntent}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
+	@Check
+	def ifVirtualTrainingPhrasesAreAbsent(VirtualIntent i) {
+		val iVals = newArrayList
+			for(var j = 0 ; j < i.virtualValues.length ; j++) {
+				iVals.add(i.virtualValues.get(j).v)
+			}
 		if(!iVals.contains('trainingPhrases')) {
-			warning("The intents extending this template won't know much without a few training phrases",
-				lit.getVirtualIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
-			)
-		}
-		if(!iVals.contains('messages')) {
-			warning("The intents extending this template won't respond with anything without a few messages",
-				lit.getVirtualIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_OR_MESSAGES_ARE_ABSENT
+			warning("This intent won't know much without a few training phrases",
+				lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_ARE_ABSENT
 			)
 		}
 	}
 	
+	/**
+   * Checks if '<em><b>Messages</b></em>' are absent in the defined '<em><b>VirtualIntent</b></em>'.
+   * The parameter is of type {@link VirtualIntent}.
+   * <!-- begin-user-doc -->
+   * <p>
+   * 
+   * </p>
+   * <!-- end-user-doc -->
+   */
+	@Check
+	def ifVirtualMessagesAreAbsent(VirtualIntent i) {
+		val iVals = newArrayList
+		for(var j = 0 ; j < i.virtualValues.length ; j++) {
+			iVals.add(i.virtualValues.get(j).v)
+		}
+		if(!iVals.contains('messages')) {
+			warning("This intent won't respond with anything without a few messages",
+				lit.getIntent_Name, Lasr_langValidator.IF_MESSAGES_ARE_ABSENT
+				)
+		}
+	}
 	
 	/*
 	@Check
