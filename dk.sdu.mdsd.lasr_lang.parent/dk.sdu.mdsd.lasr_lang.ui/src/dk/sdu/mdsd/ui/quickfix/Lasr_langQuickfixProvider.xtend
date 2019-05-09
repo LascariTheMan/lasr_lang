@@ -23,6 +23,7 @@ import com.google.inject.spi.Message
 import dk.sdu.mdsd.lasr_lang.Messages
 import dk.sdu.mdsd.lasr_lang.Intent
 import dk.sdu.mdsd.lasr_lang.EntityType
+import dk.sdu.mdsd.lasr_lang.List
 
 /**
  * Custom quickfixes.
@@ -119,6 +120,72 @@ class Lasr_langQuickfixProvider extends DefaultQuickfixProvider {
 			val eName = (element as EntityType).name
 			val xtextDocument = context.xtextDocument
 			xtextDocument.replace(issue.offset + 11, eName.length, "_" + eName)
+		]
+	}
+	
+	@Fix(Lasr_langValidator.DUPLICATE_PARAMETER)
+	def removeDuplicateParameter(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Remove duplicate parameter', "Removes the duplicate parameter", 'upcase.png') [
+			element, context |
+			val xtextDocument = context.xtextDocument
+			xtextDocument.replace(issue.offset, issue.length,"")
+		]
+	}
+	
+	@Fix(Lasr_langValidator.DUPLICATE_PARAMETER)
+	def changeDuplicateParameterName(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Change parameter name', "Changes the parameter name", 'upcase.png') [
+			element, context |
+			val pName = (element as Parameter).name
+			val xtextDocument = context.xtextDocument
+			xtextDocument.replace(issue.offset + 10, pName.length, "_" + pName)
+		]
+	}
+	
+	@Fix(Lasr_langValidator.IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED)
+	def addTemplatePhrase(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Add a phrase', 'Adds a template phrase to the trainingphrases', 'upcase.png') [
+			element, context |
+			(element as TrainingPhrases).phrases.add(Lasr_langFactory::eINSTANCE.createPhrase() =>
+				[Lasr_langFactory::eINSTANCE.createSentence() => 
+					[words.add(Lasr_langFactory::eINSTANCE.createWords() => 
+						[name="Can i please ..."]
+						)
+					]
+				]
+			) 
+		]
+	}
+	// doesnt work
+	@Fix(Lasr_langValidator.IF_TRAINING_PHRASES_ARE_ABSENT)
+	def addTrainingPhrasesToIntent(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Add TrainingPhrases to intent', 'Add TrainingPhrases to: ', 'upcase.png') [
+			element, context |
+			(element as Intent).values.add(Lasr_langFactory::eINSTANCE.createIntentValue() => [
+				Lasr_langFactory::eINSTANCE.createIntentOptional() => [
+					Lasr_langFactory::eINSTANCE.createList() => [
+						Lasr_langFactory::eINSTANCE.createTrainingPhrases()
+						]	
+					]
+				]
+			)
+		]
+	}
+	// doesnt work
+	@Fix(Lasr_langValidator.IF_MESSAGES_ARE_ABSENT)
+	def addMessagesToIntent(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Add Messages to intent', 'Add Messages to: ', 'upcase.png') [
+			element, context |
+			(element as Intent).values.add(Lasr_langFactory::eINSTANCE.createIntentValue() => [
+				Lasr_langFactory::eINSTANCE.createIntentOptional() => [
+					Lasr_langFactory::eINSTANCE.createList() => [
+						Lasr_langFactory::eINSTANCE.createMessages() => [
+							Lasr_langFactory::eINSTANCE.createWords() => [name=""]
+							]
+						]	
+					]
+				]
+			)
 		]
 	}
 }
