@@ -91,7 +91,7 @@ class Lasr_langQuickfixProvider extends DefaultQuickfixProvider {
 			element, context |
 			val iName = (element as Intent).name
 			val xtextDocument = context.xtextDocument
-			xtextDocument.replace(issue.offset + 7, iName.length, "_" + iName)
+			xtextDocument.replace(issue.offset + 7, iName.length, iName + "_")
 		]
 	}
 	
@@ -119,7 +119,7 @@ class Lasr_langQuickfixProvider extends DefaultQuickfixProvider {
 			element, context |
 			val eName = (element as EntityType).name
 			val xtextDocument = context.xtextDocument
-			xtextDocument.replace(issue.offset + 11, eName.length, "_" + eName)
+			xtextDocument.replace(issue.offset + 11, eName.length, eName + "_")
 		]
 	}
 	
@@ -138,7 +138,7 @@ class Lasr_langQuickfixProvider extends DefaultQuickfixProvider {
 			element, context |
 			val pName = (element as Parameter).name
 			val xtextDocument = context.xtextDocument
-			xtextDocument.replace(issue.offset + 10, pName.length, "_" + pName)
+			xtextDocument.replace(issue.offset + 10, pName.length, pName + "_")
 		]
 	}
 	
