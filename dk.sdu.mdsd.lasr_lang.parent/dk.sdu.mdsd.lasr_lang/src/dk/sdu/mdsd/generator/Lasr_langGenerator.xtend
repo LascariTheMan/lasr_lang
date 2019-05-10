@@ -110,12 +110,11 @@ class Lasr_langGenerator extends AbstractGenerator {
 				key = raw_value.v 
 				value = raw_value.name
 				obj.addProperty(key, value.toString)
-			} else if (raw_value instanceof TrainingPhrases) {
-				generateTrainingPhrases(intent, obj, raw_value)			
-			} else if (raw_value instanceof Parameters) {
-				generateParameters(intent, obj, raw_value)
-			} else if (raw_value instanceof Messages) {
-				generateMessages(obj, raw_value)
+			}
+			switch raw_value {
+				TrainingPhrases: generateTrainingPhrases(intent, obj, raw_value)
+				Parameters: generateParameters(intent, obj, raw_value)	
+				Messages: generateMessages(obj, raw_value)
 			}
 		}
 		if(intent.vi !== null && virtualIntents.containsKey(intent.vi.name)) {
