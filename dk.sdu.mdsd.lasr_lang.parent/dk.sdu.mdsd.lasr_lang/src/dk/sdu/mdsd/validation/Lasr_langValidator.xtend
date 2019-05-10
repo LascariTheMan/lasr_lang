@@ -84,8 +84,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	def ifRequiredParameterThenPrompts(Parameter param){
 		if(param.req == "required" && param.prompts.isEmpty()) {
 			error("You must create at least one prompt if the parameter is "+ param.req.toString(),
-				null,
-				IF_REQUIRED_PARAM_THEN_PROMPT)
+				null, IF_REQUIRED_PARAM_THEN_PROMPT)
 		}
 	}
 	
@@ -159,13 +158,13 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	@Check
 	def ifTrainingPhrasesAreAbsent(Intent i) {
 		val iVals = newArrayList
-			if(i.vi === null) { 
-				for(var j = 0 ; j < i.values.length ; j++) {
+		if(i.vi === null) { 
+			for(var j = 0 ; j < i.values.length ; j++) {
 				iVals.add(i.values.get(j).iv.v)
 			}
 			if(!iVals.contains('trainingPhrases')) {
 				warning("This intent won't know much without a few training phrases",
-					lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_ARE_ABSENT
+					i, lit.intent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_ARE_ABSENT
 				)
 			}
 		}
@@ -183,13 +182,13 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	@Check
 	def ifMessagesAreAbsent(Intent i) {
 		val iVals = newArrayList
-			if(i.vi === null) { 
-				for(var j = 0 ; j < i.values.length ; j++) {
+		if(i.vi === null) { 
+			for(var j = 0 ; j < i.values.length ; j++) {
 				iVals.add(i.values.get(j).iv.v)
 			}
 			if(!iVals.contains('messages')) {
 				warning("This intent won't respond with anything without a few messages",
-					lit.getIntent_Name, Lasr_langValidator.IF_MESSAGES_ARE_ABSENT
+					i, lit.intent_Name, Lasr_langValidator.IF_MESSAGES_ARE_ABSENT
 				)
 			}
 		}
@@ -212,7 +211,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 			}
 		if(!iVals.contains('trainingPhrases')) {
 			warning("This intent won't know much without a few training phrases",
-				lit.getIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_ARE_ABSENT
+				lit.getVirtualIntent_Name, Lasr_langValidator.IF_TRAINING_PHRASES_ARE_ABSENT
 			)
 		}
 	}
@@ -234,7 +233,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}
 		if(!iVals.contains('messages')) {
 			warning("This intent won't respond with anything without a few messages",
-				lit.getIntent_Name, Lasr_langValidator.IF_MESSAGES_ARE_ABSENT
+				lit.getVirtualIntent_Name, Lasr_langValidator.IF_MESSAGES_ARE_ABSENT
 				)
 		}
 	}
