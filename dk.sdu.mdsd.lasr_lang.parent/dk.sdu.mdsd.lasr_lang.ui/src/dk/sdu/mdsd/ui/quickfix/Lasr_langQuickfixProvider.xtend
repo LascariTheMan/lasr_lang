@@ -24,6 +24,8 @@ import dk.sdu.mdsd.lasr_lang.Messages
 import dk.sdu.mdsd.lasr_lang.Intent
 import dk.sdu.mdsd.lasr_lang.EntityType
 import dk.sdu.mdsd.lasr_lang.List
+import dk.sdu.mdsd.lasr_lang.IntentValue
+import dk.sdu.mdsd.lasr_lang.IntentOptional
 
 /**
  * Custom quickfixes.
@@ -141,19 +143,15 @@ class Lasr_langQuickfixProvider extends DefaultQuickfixProvider {
 			xtextDocument.replace(issue.offset + 10, pName.length, pName + "_")
 		]
 	}
-	
+	// doesnt work
 	@Fix(Lasr_langValidator.IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED)
 	def addTemplatePhrase(Issue issue, IssueResolutionAcceptor acceptor) {
 		acceptor.accept(issue, 'Add a phrase', 'Adds a template phrase to the trainingphrases', 'upcase.png') [
 			element, context |
-			(element as TrainingPhrases).phrases.add(Lasr_langFactory::eINSTANCE.createPhrase() =>
-				[Lasr_langFactory::eINSTANCE.createSentence() => 
-					[words.add(Lasr_langFactory::eINSTANCE.createWords() => 
-						[name="Can i please ..."]
-						)
-					]
-				]
-			) 
+			(element as TrainingPhrases).phrases.add(Lasr_langFactory::eINSTANCE.createPhrase()) 
+			(element as Phrase).sentences.add(Lasr_langFactory::eINSTANCE.createSentence() => [
+				Lasr_langFactory::eINSTANCE.createWords() => []
+			])
 		]
 	}
 	// doesnt work
@@ -161,14 +159,9 @@ class Lasr_langQuickfixProvider extends DefaultQuickfixProvider {
 	def addTrainingPhrasesToIntent(Issue issue, IssueResolutionAcceptor acceptor) {
 		acceptor.accept(issue, 'Add TrainingPhrases to intent', 'Add TrainingPhrases to: ', 'upcase.png') [
 			element, context |
-			(element as Intent).values.add(Lasr_langFactory::eINSTANCE.createIntentValue() => [
-				Lasr_langFactory::eINSTANCE.createIntentOptional() => [
-					Lasr_langFactory::eINSTANCE.createList() => [
-						Lasr_langFactory::eINSTANCE.createTrainingPhrases()
-						]	
-					]
-				]
-			)
+			val original = context.xtextDocument.get(issue.offset, issue.length+2)
+			val replacement = original + "\ntrainingPhrases {\n}"
+			context.xtextDocument.replace(issue.offset, issue.length, replacement)
 		]
 	}
 	// doesnt work
