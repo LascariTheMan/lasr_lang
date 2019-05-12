@@ -3,7 +3,7 @@ grammar dk.sdu.mdsd.Lasr_lang with org.eclipse.xtext.common.Terminals
 generate lasr_lang "http://www.sdu.dk/mdsd/lasr_lang"
 
 Model:
-	virtualIntents+=VirtualIntent* intents+=Intent* entitytypes+=EntityType*
+	VirtualParameters+=VirtualParameters* virtualIntents+=VirtualIntent* intents+=Intent* entitytypes+=EntityType* 
 ;
 
 Agent:
@@ -69,7 +69,7 @@ Words:
 ;
 
 Parameters:
-	{Parameters} v='parameters' '{'parameters+=Parameter*'}'
+	 v='parameters' (':' vp=[VirtualParameters])? '{'parameters+=Parameter*'}'
 ;
 
 Parameter:
@@ -87,6 +87,11 @@ Messages:
 // VirtualIntent -----------------------------------------------------------------------------------------------------------------
 VirtualIntent:
 	'virtual' 'intent' name = ID '{' virtualValues+=List* '}'
+;
+
+// VirtualParameters
+VirtualParameters:
+	'virtual' 'parameters' name = ID '{' virtualParameters+=Parameter* '}'
 ;
 
 // EntityType ---------------------------------------------------------------------------------------------------------------------
