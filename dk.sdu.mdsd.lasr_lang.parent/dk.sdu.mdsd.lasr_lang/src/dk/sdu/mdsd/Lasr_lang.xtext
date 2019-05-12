@@ -33,7 +33,7 @@ Bool:
 
 // Intents----------------------------------------------------------------------------------------------------------------
 Intent:
-	{Intent} 'Intent' name=ID (':' vi=[VirtualIntent])? '{'values+=IntentValue*'}'
+	{Intent} 'Intent' name=ID (':' vi+=[VirtualIntent](',' vi+=[VirtualIntent]))? '{'values+=IntentValue*'}'
 ;
 
 IntentValue:

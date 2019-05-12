@@ -182,14 +182,16 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	@Check
 	def ifMessagesAreAbsent(Intent i) {
 		val iVals = newArrayList
-		if(i.vi === null) { 
-			for(var j = 0 ; j < i.values.length ; j++) {
-				iVals.add(i.values.get(j).iv.v)
-			}
-			if(!iVals.contains('messages')) {
-				warning("This intent won't respond with anything without a few messages",
-					i, lit.intent_Name, Lasr_langValidator.IF_MESSAGES_ARE_ABSENT
-				)
+		for (vi : i.vi) {
+			if(i.vi === null) { 
+				for(var j = 0 ; j < i.values.length ; j++) {
+					iVals.add(i.values.get(j).iv.v)
+				}
+				if(!iVals.contains('messages')) {
+					warning("This intent won't respond with anything without a few messages",
+						i, lit.intent_Name, Lasr_langValidator.IF_MESSAGES_ARE_ABSENT
+					)
+				}
 			}
 		}
 	}

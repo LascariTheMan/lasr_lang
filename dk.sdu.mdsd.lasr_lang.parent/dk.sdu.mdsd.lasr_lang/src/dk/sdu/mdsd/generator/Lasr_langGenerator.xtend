@@ -67,9 +67,10 @@ class Lasr_langGenerator extends AbstractGenerator {
 	}
 
 	def findVirtualIntents(Intent intent) {
-		if (intent.vi !== null) {
-			virtualIntents.put(intent.vi.name, intent.vi)
-			println("virtualintent")
+		for(vi : intent.vi) {
+			if (vi !== null) {
+				virtualIntents.put(vi.name, vi)
+			}
 		}
 	}
 
@@ -139,40 +140,57 @@ class Lasr_langGenerator extends AbstractGenerator {
 				}
 			}	
 		}
-		if (intent.vi !== null && virtualIntents.containsKey(intent.vi.name)) {
-			appendVirtualIntentJSON(intent, obj)
+		for (vi : intent.vi) {
+			if (vi !== null && virtualIntents.containsKey(vi.name)) {
+				appendVirtualIntentJSON(intent, obj)
+			}
 		}
+		
 
 		intents.add(obj)
 	}
 
 	def appendVirtualIntentJSON(Intent intent, JsonObject objToExtend) {
-		val aIntent = virtualIntents.get(intent.vi.name)
-		for (aValue : aIntent.virtualValues) {
-			if (aValue instanceof TrainingPhrases) {
-				if (objToExtend.getAsJsonArray("trainingPhrases") === null) {
-					objToExtend.add("trainingPhrases", new JsonArray)
-				}
-				val phrases = objToExtend.getAsJsonArray("trainingPhrases")
-				for (phrase : aValue.phrases) {
-					phrases.add(appendTrainingPhrases(aIntent, objToExtend, phrase))
-				}
-			} else if (aValue instanceof Parameters) {
-				if (objToExtend.getAsJsonArray("parameters") === null) {
-					objToExtend.add("parameters", new JsonArray)
-				}
-				val parameters = objToExtend.getAsJsonArray("parameters")
-				for (parameter : aValue.parameters) {
-					parameters.add(appendParameter(objToExtend, parameter)) // removed aIntent from method (change if broken)
-				}
-			} else if (aValue instanceof Messages) {
-				if (objToExtend.getAsJsonArray("messages") === null) {
-					generateMessages(objToExtend, aValue)
-				} else {
-					appendMessages(objToExtend, aValue)
-				}
+		intent.vi.filter(VirtualIntent).forEach[
+			if(virtualIntents.containsKey(name)) {
+				val aIntent = virtualIntents.get(name)
+				for (aValue : aIntent.virtualValues) {
+					if (aValue instanceof TrainingPhrases) {
+						if (objToExtend.getAsJsonArray("trainingPhrases") === null) {
+							objToExtend.add("trainingPhrases", new JsonArray)
+						}
+						val phrases = objToExtend.getAsJsonArray("trainingPhrases")
+						for (phrase : aValue.phrases) {
+							phrases.add(appendTrainingPhrases(aIntent, objToExtend, phrase))
+						}
+					} else if (aValue instanceof Parameters) {
+						if (objToExtend.getAsJsonArray("parameters") === null) {
+							objToExtend.add("parameters", new JsonArray)
+						}
+						val parameters = objToExtend.getAsJsonArray("parameters")
+						for (parameter : aValue.parameters) {
+							parameters.add(appendParameter(objToExtend, parameter))
+						}
+						if (aValue.vp !== null && virtualParameters.containsKey(aValue.vp.name)) {
+							if (objToExtend.getAsJsonArray("parameters") === null) {
+								objToExtend.add("parameters", new JsonArray)
+							}
+							val virtualParameters = objToExtend.getAsJsonArray("parameters")
+							for (vParameter : aValue.vp.virtualParameters) {
+								virtualParameters.add(appendParameter(objToExtend, vParameter))
+							}
+						}
+					} else if (aValue instanceof Messages) {
+						if (objToExtend.getAsJsonArray("messages") === null) {
+							generateMessages(objToExtend, aValue)
+						} else {
+							appendMessages(objToExtend, aValue)
+						}
+					}
+				}	
 			}
-		}
+			virtualIntents.remove(name)
+		]
 	}
 
 	def appendTrainingPhrases(VirtualIntent aIntent, JsonObject object, Phrase phrase) {
