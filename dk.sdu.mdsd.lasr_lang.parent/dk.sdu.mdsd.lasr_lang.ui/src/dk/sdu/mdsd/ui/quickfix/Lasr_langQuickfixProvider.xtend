@@ -3,29 +3,20 @@
  */
 package dk.sdu.mdsd.ui.quickfix
 
+import dk.sdu.mdsd.lasr_lang.EntityType
+import dk.sdu.mdsd.lasr_lang.Intent
+import dk.sdu.mdsd.lasr_lang.Lasr_langFactory
+import dk.sdu.mdsd.lasr_lang.Messages
+import dk.sdu.mdsd.lasr_lang.Parameter
+import dk.sdu.mdsd.lasr_lang.Phrase
+import dk.sdu.mdsd.lasr_lang.Prompt
+import dk.sdu.mdsd.lasr_lang.Sentence
+import dk.sdu.mdsd.lasr_lang.TrainingPhrases
+import dk.sdu.mdsd.validation.Lasr_langValidator
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
 import org.eclipse.xtext.ui.editor.quickfix.Fix
-import dk.sdu.mdsd.validation.Lasr_langValidator
-import org.eclipse.xtext.validation.Issue
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
-import dk.sdu.mdsd.lasr_lang.Prompt
-import dk.sdu.mdsd.lasr_lang.Parameter
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.ui.editor.model.edit.IModificationContext
-import dk.sdu.mdsd.lasr_lang.Lasr_langFactory
-import dk.sdu.mdsd.lasr_lang.Model
-import dk.sdu.mdsd.lasr_lang.TrainingPhrases
-import dk.sdu.mdsd.lasr_lang.Words
-import dk.sdu.mdsd.lasr_lang.ui.internal.Lasr_langActivator
-import dk.sdu.mdsd.lasr_lang.Phrase
-import dk.sdu.mdsd.lasr_lang.Sentence
-import com.google.inject.spi.Message
-import dk.sdu.mdsd.lasr_lang.Messages
-import dk.sdu.mdsd.lasr_lang.Intent
-import dk.sdu.mdsd.lasr_lang.EntityType
-import dk.sdu.mdsd.lasr_lang.List
-import dk.sdu.mdsd.lasr_lang.IntentValue
-import dk.sdu.mdsd.lasr_lang.IntentOptional
+import org.eclipse.xtext.validation.Issue
 
 /**
  * Custom quickfixes.
