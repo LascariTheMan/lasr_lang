@@ -284,20 +284,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	def searchForInjections(Messages messages, AbstractIntent aIntent) {
 		for (message : messages.messages) {
-			var fromIndex = 0
-			while ((fromIndex = message.name.indexOf(toFind, fromIndex)) != -1 ) {
-	            var endOfWord = message.name.indexOf(" ", fromIndex)
-	            if (endOfWord === -1) {
-					endOfWord = message.name.length
-				}
-				val injection = message.name.substring(fromIndex+1, endOfWord)
-				if (listOfInjections.get(aIntent.name) === null) {
-					listOfInjections.put(aIntent.name, new ArrayList)
-				}
-				val list = listOfInjections.get(aIntent.name)
-				list.add(injection)
-	            fromIndex++
-        	}
+			addInjection(aIntent, message)
 		}
 	}
 	
@@ -305,23 +292,27 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		for (phrases : trainingPhrases.phrases) {
 			for (sentence : phrases.sentences) {
 				for (words : sentence.words) {
-					var fromIndex = 0
-					while ((fromIndex = words.name.indexOf(toFind, fromIndex)) != -1 ) {
-			            var endOfWord = words.name.indexOf(" ", fromIndex)
-			            if (endOfWord === -1) {
-							endOfWord = words.name.length
-						}
-						val injection = words.name.substring(fromIndex+1, endOfWord)
-						if (listOfInjections.get(aIntent.name) === null) {
-							listOfInjections.put(aIntent.name, new ArrayList)
-						}
-						val list = listOfInjections.get(aIntent.name)
-						list.add(injection)
-			            fromIndex++
-		        	}					
+					addInjection(aIntent, words)				
 				}
 			}
 		}
+	}
+	
+	def addInjection(AbstractIntent aIntent, Words words) {
+		var fromIndex = 0
+		while ((fromIndex = words.name.indexOf(toFind, fromIndex)) != -1 ) {
+            var endOfWord = words.name.indexOf(" ", fromIndex)
+            if (endOfWord === -1) {
+				endOfWord = words.name.length
+			}
+			val injection = words.name.substring(fromIndex+1, endOfWord)
+			if (listOfInjections.get(aIntent.name) === null) {
+				listOfInjections.put(aIntent.name, new ArrayList)
+			}
+			val list = listOfInjections.get(aIntent.name)
+			list.add(injection)
+            fromIndex++
+    	}
 	}
 	
    /**

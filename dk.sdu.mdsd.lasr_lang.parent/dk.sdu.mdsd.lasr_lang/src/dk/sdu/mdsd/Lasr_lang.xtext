@@ -3,40 +3,36 @@ grammar dk.sdu.mdsd.Lasr_lang with org.eclipse.xtext.common.Terminals
 generate lasr_lang "http://www.sdu.dk/mdsd/lasr_lang"
 
 Model:
-	abstractIntents+=AbstractIntent* intents+=Intent* entitytypes+=EntityType*
+	abstractParameters+=GeneralAbstractParameter* abstractIntents+=AbstractIntent* intents+=Intent* entitytypes+=EntityType*
 ;
 
-Agent:
-	{Agent} 'Agent' '{'values+=AgentValue*'}'
-;
-
-AgentValue:
-	aa=AgentAttribute ':' value=Value
-;
-
-AgentAttribute:
-	('parent' | 'displayName' | 'defaultLanguageCode' | 'timezone' | 'enableLogging')  
-;
-
-Value:
-	v=ValueName | bool=Bool
-;
-
-ValueName:
-	name=ID 
-;
-
-Bool:
-	'true' | 'false'
-;
-
-// Abstract Intent ----------------------------------------------------------------------------------------------------------------
+// Abstract Intent -------------
 
 AbstractIntent:
-	{AbstractIntent} 'abstract' 'intent' name=ID '{' values+=List* '}'
+	'abstract' 'intent' name=ID '{' values+=AbstractList* '}'
 ;
 
-// Intents----------------------------------------------------------------------------------------------------------------
+AbstractList:
+	TrainingPhrases | AbstractIntentParameters | Messages
+;
+
+AbstractIntentParameters:
+	{AbstractIntentParameters} 'parameters' '{'parameters+=AbstractIntentParameter*'}'
+;
+
+AbstractIntentParameter:
+	ParameterExtension | Parameter
+;
+
+ParameterExtension:
+	req=('required')? 'parameter' 'extends' name=ID '{' prompts+=Prompt* '}'
+;
+
+GeneralAbstractParameter:
+	'abstract' 'parameter' name=ID '{' 'entityType' ':' type=ID  prompts+=Prompt* '}'
+;
+
+// Intents----------------------
 Intent:
 	{Intent} 'Intent' name=ID ('extends' toExtend=ID ('(' injections+=Injection(',' injections+=Injection)* ')')?)? '{' values+=IntentValue* '}'
 ;
@@ -78,11 +74,15 @@ Words:
 ;
 
 Parameters:
-	{Parameters} v='parameters' '{'parameters+=Parameter*'}'
+	v='parameters' '{'parameters+=Parameter* (promptExtensions+=PromptExtension)?'}'
 ;
 
 Parameter:
 	req=('required')? 'parameter' name=ID '{' 'entityType' ':' type=ID  prompts+=Prompt* '}'
+;
+
+PromptExtension:
+	name=ID '{' prompts+=Prompt* '}'
 ;
 
 Prompt:
@@ -93,7 +93,7 @@ Messages:
 	{Messages} v='messages' '{' messages+=Words(',' messages+=Words)* '}'
 ;
 
-// EntityType ---------------------------------------------------------------------------------------------------------------------
+// EntityType -----------------
 EntityType:
 	'EntityType' name=ID '{' a='autoExpansion' ':' exp=('true'|'false') entities+=Entities+ '}'	
 ;
