@@ -153,9 +153,9 @@ class Lasr_langGenerator extends AbstractGenerator {
 				val parameters = getParametersOrCreateEntry(obj)
 				for (parameter: aValue.parameters) {
 					if (parameter instanceof Parameter) {
-						parameters.add(appendParameter(obj, parameter))	
+						parameters.add(appendParameter(parameter))	
 					} else if (parameter instanceof ParameterExtension) {
-						parameters.add(appendParameterExtension(obj, parameter))	
+						parameters.add(appendParameterExtension(parameter))	
 					}
 				}	
 			} else if (aValue instanceof Messages) {
@@ -318,13 +318,16 @@ class Lasr_langGenerator extends AbstractGenerator {
 			parameter_json.add(prompt_key, prompt_values)
 			values.add(parameter_json)
 		}
+		for (parameter : raw_value.abstractParametersExtension) {
+			values.add(appendParameterExtension(parameter))
+		}
 		obj.add(key, values)
 		for (promptExtension : raw_value.promptExtensions) {
 			promptsToAppend.add(promptExtension)
 		}
 	}
 	
-	def appendParameter(JsonObject obj, Parameter parameter) {
+	def appendParameter(Parameter parameter) {
 		val parameter_json = new JsonObject
 		if (parameter.req !== null) {
 			parameter_json.addProperty("mandatory", true)	
@@ -345,7 +348,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		return parameter_json
 	}
 	
-	def appendParameterExtension(JsonObject obj, ParameterExtension parameter) {
+	def appendParameterExtension(ParameterExtension parameter) {
 		val abstractParameter = abstractParameters.get(parameter.name)
 		val parameter_json = new JsonObject
 		if (parameter.req !== null) {

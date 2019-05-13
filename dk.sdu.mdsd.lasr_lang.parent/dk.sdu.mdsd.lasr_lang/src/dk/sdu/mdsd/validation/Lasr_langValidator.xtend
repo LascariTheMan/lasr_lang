@@ -3,8 +3,6 @@
  */
 package dk.sdu.mdsd.validation
 
-import dk.sdu.mdsd.lasr_lang.Agent
-import dk.sdu.mdsd.lasr_lang.AgentValue
 import dk.sdu.mdsd.lasr_lang.EntityType
 import dk.sdu.mdsd.lasr_lang.Intent
 import dk.sdu.mdsd.lasr_lang.IntentValue
@@ -55,53 +53,8 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	val listOfInjections = new HashMap<String, ArrayList<String>>
 	val intentExtensions = new ArrayList<String>
 	public val lit = Lasr_langPackage.eINSTANCE
-	
-	/**
-   * Checks if any '<em><b>Agent</b></em>' parameters are missing.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	@Check
-	def checkIfAgentParamsAreMissing(Agent agent) {
-		checkAgentParams(agent)
-	}
-	
-	/**
-   * Checks if '<em><b>AgentValues</b></em>' parameters are UpperCase.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	@Check
-	def checkIfAgentParamsAreUpper(AgentValue av) {
-		if (!Character.isUpperCase(av.value.v.name.charAt(0))) {
-        warning('Agent attributes should start with a capital', av.value.v, 
-                lit.getValueName_Name,
-                INVALID_NAME)
-    	}
-	}
-	
-	/**
-   * Checks if '<em><b>AgentValues</b></em>' parameters are allowed, i.e the agent value "parent" =/= boolean.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	@Check
-	def checkIfAgentParamsAreAllowed(AgentValue agentVal) {
-		checkAgentParams(agentVal)
-	}
-	
+
+
 	/**
    * Checks if '<em><b>Parameter</b></em>' are required, and if so, that a prompt has been defined.
    * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Parameter}.
@@ -390,102 +343,4 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 				}
 			}
 		}
-	
-	 /**
-   * Checks if a '<em><b>Agent</b></em>' has no duplicate entries.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Agent}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	@Check
-	def checkAgentHasOnlyOneOfEachParam(Agent a) {
-		val agentValSet = newHashSet
-		for(var i = 0 ; i < a.values.length ; i++) {
-			if(!agentValSet.add(a.values.get(i).aa)){
-				error("Duplicate entry", a.values.get(i), null, DUPLICATE_ENTRY + " : "+ a.values.get(i))
-			}
-		}		
-	}
-	
-	 /**
-   * Checks if an '<em><b>AgentValue</b></em>' has no type mismatches.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.AgentValue}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	def checkAgentParams(AgentValue agentVal) {
-		val bool = agentVal.value.bool
-		if(agentVal.value.bool == 'true' || agentVal.value.bool == 'false') {
-			if(agentVal.aa == "parent") {
-				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_PARENT)
-			}
-			if(agentVal.aa == "displayName") {
-				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_DISPLAYNAME)
-			}
-			if(agentVal.aa == "defaultLanguageCode") {
-				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_DEFAULTLANGUAGECODE)
-			}
-			if(agentVal.aa == "timezone") {
-				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_TIMEZONE)
-			}
-			if(agentVal.aa == "enableLogging" && (agentVal.value.v.name !== 'true' || agentVal.value.v.name !== 'false')) {
-				error('Type mismatch:  '+ agentVal.aa + ' cannot be set to ' +agentVal.value.v.name.class.typeName, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT_ENABLELOGGING)
-			}	
-		}
-		
-	}
-	
-	 /**
-   * Checks if an '<em><b>Agent</b></em>' has no missing parameters.
-   * The parameters are of type {@link dk.sdu.mdsd.lasr_lang.Agent}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	def checkAgentParams(Agent agent) {
-		val agentValues = newArrayList
-		for(AgentValue v : agent.values) {
-			agentValues.add(v.aa)
-		}
-		
-		if (!agentValues.contains('parent')) {
-			error('You must define the parent variable', 
-					null,
-					MISSING_AGENT_PARENT)
-		} else if (!agentValues.contains('displayName')) {
-			error('You must define the displayName variable', 
-					null,
-					MISSING_AGENT_DISPLAYNAME)
-		} else if (!agentValues.contains('defaultLanguageCode')) {
-			error('You must define the defaultLanguageCode variable', 
-					null,
-					MISSING_AGENT_DEFAULTLANGUAGECODE)
-		} else if (!agentValues.contains('timezone')) {
-			error('You must define the timezone variable', 
-					null,
-					MISSING_AGENT_TIMEZONE)
-		} else if (!agentValues.contains('enableLogging')) {
-			error('You must define the enableLogging variable', 
-					null,
-					MISSING_AGENT_ENABLELOGGING)
-		}
-	}
 }

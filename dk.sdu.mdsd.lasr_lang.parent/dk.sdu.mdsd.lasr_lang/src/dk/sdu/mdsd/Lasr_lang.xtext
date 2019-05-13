@@ -74,7 +74,7 @@ Words:
 ;
 
 Parameters:
-	v='parameters' '{'parameters+=Parameter* (promptExtensions+=PromptExtension)?'}'
+	v='parameters' '{'parameters+=Parameter* (promptExtensions+=PromptExtension)? (abstractParametersExtension+=ParameterExtension)?'}'
 ;
 
 Parameter:
