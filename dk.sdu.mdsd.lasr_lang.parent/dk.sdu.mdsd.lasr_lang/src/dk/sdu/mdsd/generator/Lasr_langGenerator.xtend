@@ -11,7 +11,7 @@ import com.google.gson.JsonObject
 import dk.sdu.mdsd.lasr_lang.AbstractIntent
 import dk.sdu.mdsd.lasr_lang.AbstractIntentParameters
 import dk.sdu.mdsd.lasr_lang.EntityType
-import dk.sdu.mdsd.lasr_lang.GeneralAbstractParameter
+import dk.sdu.mdsd.lasr_lang.AbstractParameter
 import dk.sdu.mdsd.lasr_lang.Intent
 import dk.sdu.mdsd.lasr_lang.KeyValue
 import dk.sdu.mdsd.lasr_lang.Messages
@@ -38,7 +38,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	val httpRequest = new HttpRequest
 	val stringTypes = new StringTypes
 	val abstractIntents = new HashMap<String, AbstractIntent>()
-	val abstractParameters = new HashMap<String, GeneralAbstractParameter>()
+	val abstractParameters = new HashMap<String, AbstractParameter>()
 	val definedInjections = new HashMap<String, String>()
 	val promptsToAppend = new ArrayList<PromptExtension>
 	val toFind = "%"
@@ -59,7 +59,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 		val apikeyManager = new ApiKeyManager
 		
 		resource.allContents.filter(AbstractIntent).forEach[addAbstractIntents()]
-		resource.allContents.filter(GeneralAbstractParameter).forEach[addGeneralAbstractParameters()]
+		resource.allContents.filter(AbstractParameter).forEach[addGeneralAbstractParameters()]
 		resource.allContents.filter(Intent).forEach[generateIntentJSON(intents)]
 		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypes)]
 
@@ -107,7 +107,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	}
 	 
 	 
-	def addGeneralAbstractParameters(GeneralAbstractParameter abstractParameter) {
+	def addGeneralAbstractParameters(AbstractParameter abstractParameter) {
 		abstractParameters.put(abstractParameter.name, abstractParameter)
 	}
 

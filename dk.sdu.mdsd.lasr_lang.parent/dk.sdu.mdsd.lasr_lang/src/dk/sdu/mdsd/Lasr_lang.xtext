@@ -3,7 +3,7 @@ grammar dk.sdu.mdsd.Lasr_lang with org.eclipse.xtext.common.Terminals
 generate lasr_lang "http://www.sdu.dk/mdsd/lasr_lang"
 
 Model:
-	abstractParameters+=GeneralAbstractParameter* abstractIntents+=AbstractIntent* intents+=Intent* entitytypes+=EntityType*
+	abstractParameters+=AbstractParameter* abstractIntents+=AbstractIntent* intents+=Intent* entitytypes+=EntityType*
 ;
 
 // Abstract Intent -------------
@@ -25,10 +25,10 @@ AbstractIntentParameter:
 ;
 
 ParameterExtension:
-	req=('required')? 'parameter' 'extends' name=ID '{' prompts+=Prompt* '}'
+	{ParameterExtension} req=('required')? 'parameter' 'extends' name=ID '{' prompts+=Prompt* '}'
 ;
 
-GeneralAbstractParameter:
+AbstractParameter:
 	'abstract' 'parameter' name=ID '{' 'entityType' ':' type=ID  prompts+=Prompt* '}'
 ;
 

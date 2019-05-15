@@ -19,6 +19,8 @@ import org.eclipse.xtext.validation.Check
 import dk.sdu.mdsd.lasr_lang.AbstractIntent
 import java.util.ArrayList
 import java.util.HashMap
+import dk.sdu.mdsd.lasr_lang.AbstractParameter
+import dk.sdu.mdsd.lasr_lang.ParameterExtension
 
 /**
  * This class contains custom validation rules. 
@@ -44,6 +46,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	public static val PHRASE_STRING_SHOULD_NOT_BE_EMPTY = 'phraseStringShouldNotBeEmpty'
 	public static val INJECTIONS_NOT_FULFILLED = 'injectionsNotFulfilled'
 	public static val MESSAGE_STRING_SHOULD_NOT_BE_EMPTY = 'messageStringShouldNotBeEmpty'
+	public static val ABSTRACT_PARAMETER_DOES_NOT_EXIST = 'abstractParameterDoesNotExist'
 	public static val MISSING_INTENT_DISPLAYNAME = 'missingIntentDisplayName'
 	public static val DUPLICATE_ENTRY = 'duplicateEntryError'
 	public static val IF_TRAINING_PHRASE_DEFINED_THEN_PHRASES_MUST_BE_DEFINED = 'missingPhrasesWhenTrainingPhrasesFieldisDef'
@@ -51,9 +54,16 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	val toFind = "%"
 	val listOfInjections = new HashMap<String, ArrayList<String>>
+	val listOfAbstractIntents = new HashMap<String, AbstractIntent>
+	val listOfAbstractParameters = new HashMap<String, AbstractParameter>
 	val intentExtensions = new ArrayList<String>
 	public val lit = Lasr_langPackage.eINSTANCE
 
+	
+	@Check
+	def clearExtensions() {
+		listOfInjections.clear
+	}
 
 	/**
    * Checks if '<em><b>Parameter</b></em>' are required, and if so, that a prompt has been defined.
@@ -194,15 +204,16 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	def phraseStringShouldNotBeEmpty(Sentence s) {
 		s.words.filter[it.name.empty].forEach[
 			warning("A phrase should not be empty",
-					lit.getSentence_Words,
-					PHRASE_STRING_SHOULD_NOT_BE_EMPTY
-				)
+				lit.getSentence_Words,
+				PHRASE_STRING_SHOULD_NOT_BE_EMPTY
+			)
 		]
 	}
 	
 	@Check
 	def noInjectionsForExtension(AbstractIntent aIntent) {
 		listOfInjections.clear
+		listOfAbstractIntents.put(aIntent.name, aIntent)
 		for (aValue : aIntent.values) {
 			if (aValue instanceof Messages) {
 				searchForInjections(aValue, aIntent)
@@ -213,10 +224,38 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	}
 	
 	@Check
+	def addAbstractParameters(AbstractParameter abstractParameter) {
+		listOfAbstractParameters.put(abstractParameter.name, abstractParameter)
+	}
+	
+	@Check
+	def checkIfAbstractParameterExists(ParameterExtension parameterExt) {
+		if (!listOfAbstractParameters.containsKey(parameterExt.name)) {
+			warning("The parameter " + parameterExt.name + " does not exist",
+				lit.abstractIntentParameter_Name,
+				ABSTRACT_PARAMETER_DOES_NOT_EXIST
+			)
+		}
+	}
+	
+	@Check
+	def checkIfIntentExtendsExistingAbstractIntent(Intent intent) {
+		if (intent.toExtend !== null) {
+			if (!listOfAbstractIntents.containsKey(intent.toExtend)) {
+				warning("The abstract intent " + intent.toExtend + " does not exist",
+					lit.intent_ToExtend,
+					ABSTRACT_PARAMETER_DOES_NOT_EXIST
+				)
+			}	
+		}
+	}
+	
+	@Check
 	def necessaryInjectionAreAdded(Intent intent) {
-		intentExtensions.clear
 		val list = listOfInjections.get(intent.toExtend)
+		println(list)
 		for (injection : intent.injections) {
+			println(injection.key + " " + injection.value)
 			intentExtensions.add(injection.key)
 			if(!list.contains(injection.key)) {
 				warning("Your injections doesn't match with the defined injections in the abstract intent",
