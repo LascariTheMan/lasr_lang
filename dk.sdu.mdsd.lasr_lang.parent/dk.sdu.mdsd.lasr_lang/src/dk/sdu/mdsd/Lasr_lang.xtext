@@ -6,31 +6,6 @@ Model:
 	VirtualParameters+=VirtualParameters* virtualIntents+=VirtualIntent* intents+=Intent* entitytypes+=EntityType* 
 ;
 
-Agent:
-	{Agent} 'Agent' '{'values+=AgentValue*'}'
-;
-
-AgentValue:
-	aa=AgentAttribute ':' value=Value
-;
-
-AgentAttribute:
-	('parent' | 'displayName' | 'defaultLanguageCode' | 'timezone' | 'enableLogging')  
-;
-
-Value:
-	v=ValueName | bool=Bool
-;
-
-ValueName:
-	name=ID 
-;
-
-Bool:
-	'true' | 'false'
-;
-
-
 // Intents----------------------------------------------------------------------------------------------------------------
 Intent:
 	{Intent} 'Intent' name=ID (':' vi+=[VirtualIntent](',' vi+=[VirtualIntent]))? '{'values+=IntentValue*'}'
