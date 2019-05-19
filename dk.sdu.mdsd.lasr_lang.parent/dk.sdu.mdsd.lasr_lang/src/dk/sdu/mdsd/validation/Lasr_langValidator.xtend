@@ -24,10 +24,6 @@ import org.eclipse.xtext.validation.Check
  */
 class Lasr_langValidator extends AbstractLasr_langValidator {
 	
-	public static val INVALID_NAME = 'invalidName'
-	public static val MISSING_AGENT_PARAM = 'missingAgentParam'
-	public static val TYPEMISMATCH_AGENT = 'typeMismatchAgent'
-	public static val ONLY_ONE_AGENT_ALLOWED = 'onlyOneAgentInstanceIsAllowed'
 	public static val IF_REQUIRED_PARAM_THEN_PROMPT = 'requiredParameterMustContainPrompt'
 	public static val PROMPT_STRING_SHOULD_NOT_BE_EMPTY = 'promptStringShouldNotBeEmpty'
 	public static val PHRASE_STRING_SHOULD_NOT_BE_EMPTY = 'phraseStringShouldNotBeEmpty'
@@ -43,33 +39,6 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	
 	public val lit = Lasr_langPackage.eINSTANCE
 	
-	/**
-   * Checks if any '<em><b>Agent</b></em>' parameters are missing.
-   * The parameters are of type {@link AgentValue}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	@Check
-	def checkIfAgentParamsAreMissing(Agent agent) {
-		checkAgentParams(agent)
-	}
-
-	/**
-   * Checks if '<em><b>AgentValues</b></em>' parameters are allowed, i.e the agent value "parent" =/= boolean.
-   * The parameters are of type {@link AgentValue}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	@Check
-	def checkIfAgentParamsAreAllowed(AgentValue agentVal) {
-		checkAgentParams(agentVal)
-	}
 	
 	/**
    * Checks if '<em><b>Parameter</b></em>' are required, and if so, that a prompt has been defined.
@@ -239,30 +208,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 				)
 		}
 	}
-	
-	/*
-	@Check
-	def ifEntityIsDefinedInPhraseThenDefineInParameter(List l) {
-		val pVals = newArrayList
-		if(l instanceof Parameters) {
-			for(var j = 0 ; j < l.parameters.length ; j++) {
-				pVals.add(l.parameters.get(j).name)
-				//println(l.parameters.get(j).name)
-			}
-		}
-		if(l instanceof TrainingPhrases) {
-			System.out.println("Hej jeg er en phrase")
-			var i = 0
-			for(Phrase p : l.phrases) {
-				println(p.sentences.get(i).entity)
-				/*if(!pVals.contains(p.sentences.get(i).entity)) {
-					error("You must define the parameter in the parameters clause", lit.getTrainingPhrases_Phrases, "")
-				}
-				i++
-			}
-		}
-	}
-	 */
+
 	 
 	 /**
    * Checks if a '<em><b>Phrase</b></em>' is empty, and if so, gives a warning.
@@ -380,82 +326,4 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}		
 	}
 	
-	 /**
-   * Checks if an '<em><b>AgentValue</b></em>' has no type mismatches.
-   * The parameters are of type {@link AgentValue}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	def checkAgentParams(AgentValue agentVal) {
-		val bool = agentVal.value.bool
-		if(agentVal.value.bool == 'true' || agentVal.value.bool == 'false') {
-			if(agentVal.aa == "parent") {
-				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT + agentVal.aa)
-			}
-			if(agentVal.aa == "displayName") {
-				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT + agentVal.aa)
-			}
-			if(agentVal.aa == "defaultLanguageCode") {
-				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT + agentVal.aa)
-			}
-			if(agentVal.aa == "timezone") {
-				error('Type mismatch: '+ agentVal.aa + ' cannot be set to ' + bool, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT + agentVal.aa)
-			}
-			if(agentVal.aa == "enableLogging" && (agentVal.value.v.name !== 'true' || agentVal.value.v.name !== 'false')) {
-				error('Type mismatch:  '+ agentVal.aa + ' cannot be set to ' +agentVal.value.v.name.class.typeName, 
-					lit.getAgentValue_Value,
-					TYPEMISMATCH_AGENT + agentVal.aa)
-			}	
-		}
-		
-	}
-	
-	 /**
-   * Checks if an '<em><b>Agent</b></em>' has no missing parameters.
-   * The parameters are of type {@link Agent}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	def checkAgentParams(Agent agent) {
-		val agentValues = newArrayList
-		for(AgentValue v : agent.values) {
-			agentValues.add(v.aa)
-		}
-		
-		if (!agentValues.contains('parent')) {
-			error('You must define the parent variable', 
-					null,
-					MISSING_AGENT_PARAM + 'parent')
-		} else if (!agentValues.contains('displayName')) {
-			error('You must define the displayName variable', 
-					null,
-					MISSING_AGENT_PARAM + 'displayName')
-		} else if (!agentValues.contains('defaultLanguageCode')) {
-			error('You must define the defaultLanguageCode variable', 
-					null,
-					MISSING_AGENT_PARAM + 'defaultLanguageCode')
-		} else if (!agentValues.contains('timezone')) {
-			error('You must define the timezone variable', 
-					null,
-					MISSING_AGENT_PARAM + 'timezone')
-		} else if (!agentValues.contains('enableLogging')) {
-			error('You must define the enableLogging variable', 
-					null,
-					MISSING_AGENT_PARAM + 'enableLogging')
-		}
-	}
 }
