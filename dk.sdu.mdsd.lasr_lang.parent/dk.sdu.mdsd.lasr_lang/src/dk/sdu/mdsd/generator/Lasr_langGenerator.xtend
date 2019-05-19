@@ -51,7 +51,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 
 		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
 		resource.allContents.filter(Parameters).forEach[findVirtualParameters()]
-		resource.allContents.filter(Intent).forEach[generateIntentJSON(intents) findVirtualIntents()]
+		resource.allContents.filter(Intent).forEach[findVirtualIntents() generateIntentJSON(intents) ]
 		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypes)]
 		
 
@@ -65,7 +65,7 @@ class Lasr_langGenerator extends AbstractGenerator {
 	
 	def openSpeechBotInBrowser() {
 		try {
-			println("\n Now opening an example bot in your browser!")
+			println("Now opening an example bot in your browser!")
 			if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
     			Desktop.getDesktop().browse(new URL("https://bot.dialogflow.com/60771715-15fa-4013-a1dc-d01f7128b677").toURI);
 			}
