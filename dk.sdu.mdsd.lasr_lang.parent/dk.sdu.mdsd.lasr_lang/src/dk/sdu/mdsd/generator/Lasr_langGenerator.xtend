@@ -25,6 +25,8 @@ import java.util.HashMap
 import dk.sdu.mdsd.lasr_lang.Parameter
 import dk.sdu.mdsd.lasr_lang.Phrase
 import dk.sdu.mdsd.lasr_lang.VirtualParameters
+import java.awt.Desktop
+import java.net.URL
 
 /**
  * Generates code from your model files on save.
@@ -58,6 +60,18 @@ class Lasr_langGenerator extends AbstractGenerator {
 		httpRequest.updateKey(apikeyManager.key)
 		httpRequest.reset()
 		createIntentsAndEntityTypes(intents, entityTypes, gson)
+		openSpeechBotInBrowser()
+	}
+	
+	def openSpeechBotInBrowser() {
+		try {
+			println("\n Now opening an example bot in your browser!")
+			if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+    			Desktop.getDesktop().browse(new URL("https://bot.dialogflow.com/60771715-15fa-4013-a1dc-d01f7128b677").toURI);
+			}
+		} catch (Exception e) {
+			println("Couldn't open the example automatically: go to https://bot.dialogflow.com/60771715-15fa-4013-a1dc-d01f7128b677 manually")
+		}
 	}
 
 	def findVirtualParameters(Parameters p) {
