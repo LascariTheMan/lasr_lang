@@ -3,8 +3,6 @@
  */
 package dk.sdu.mdsd.validation
 
-import dk.sdu.mdsd.lasr_lang.Agent
-import dk.sdu.mdsd.lasr_lang.AgentValue
 import dk.sdu.mdsd.lasr_lang.Intent
 import dk.sdu.mdsd.lasr_lang.Lasr_langPackage
 import dk.sdu.mdsd.lasr_lang.Messages
@@ -232,7 +230,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 	}
 	
    /**
-   * Checks if a '<em><b>Intent</b></em>' has no duplicate entries.
+   * Checks if a '<em><b>Intent</b></em>' has duplicate entries.
    * The parameters are of type {@link Intent}.
    * <!-- begin-user-doc -->
    * <p>
@@ -251,7 +249,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}		
 	
 	 /**
-   * Checks if the '<em><b>Model</b></em>' has no duplicate intents.
+   * Checks if the '<em><b>Model</b></em>' has duplicate intents.
    * The parameters are of type {@link Model}.
    * <!-- begin-user-doc -->
    * <p>
@@ -270,7 +268,7 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 		}		
 	
 	 /**
-   * Checks if the '<em><b>Model</b></em>' has no duplicate entities.
+   * Checks if the '<em><b>Model</b></em>' has duplicate entities.
    * The parameters are of type {@link Model}.
    * <!-- begin-user-doc -->
    * <p>
@@ -306,24 +304,4 @@ class Lasr_langValidator extends AbstractLasr_langValidator {
 				}
 			}
 		}
-	
-	 /**
-   * Checks if a '<em><b>Agent</b></em>' has no duplicate entries.
-   * The parameters are of type {@link Agent}.
-   * <!-- begin-user-doc -->
-   * <p>
-   * 
-   * </p>
-   * <!-- end-user-doc -->
-   */
-	@Check
-	def checkAgentHasOnlyOneOfEachParam(Agent a) {
-		val agentValSet = newHashSet
-		for(var i = 0 ; i < a.values.length ; i++) {
-			if(!agentValSet.add(a.values.get(i).aa)){
-				error("Duplicate entry", a.values.get(i), null, DUPLICATE_AGENT_PARAMS)
-			}
-		}		
-	}
-	
 }

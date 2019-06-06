@@ -4,7 +4,6 @@
 package dk.sdu.mdsd.formatting2
 
 import com.google.inject.Inject
-import dk.sdu.mdsd.lasr_lang.Agent
 import dk.sdu.mdsd.lasr_lang.Model
 import dk.sdu.mdsd.services.Lasr_langGrammarAccess
 import org.eclipse.xtext.formatting2.AbstractFormatter2
@@ -26,13 +25,6 @@ class Lasr_langFormatter extends AbstractFormatter2 {
 		}
 		for (entityType : model.entitytypes) {
 			entityType.format
-		}
-	}
-
-	def dispatch void format(Agent agent, extension IFormattableDocument document) {
-		// TODO: format HiddenRegions around keywords, attributes, cross references, etc. 
-		for (agentValue : agent.values) {
-			agentValue.format
 		}
 	}
 	

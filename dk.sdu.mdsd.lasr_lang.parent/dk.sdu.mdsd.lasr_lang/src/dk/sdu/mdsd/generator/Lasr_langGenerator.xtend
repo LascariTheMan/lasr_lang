@@ -7,7 +7,6 @@ import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import dk.sdu.mdsd.lasr_lang.Agent
 import dk.sdu.mdsd.lasr_lang.Intent
 import dk.sdu.mdsd.lasr_lang.KeyValue
 import dk.sdu.mdsd.lasr_lang.Parameters
@@ -46,10 +45,8 @@ class Lasr_langGenerator extends AbstractGenerator {
 
 		val intents = new ArrayList<JsonObject>()
 		val entityTypes = new ArrayList<JsonObject>()
-		val agentJSON = new JsonObject
 		val apikeyManager = new ApiKeyManager
 
-		resource.allContents.filter(Agent).forEach[generateAgentJSON(agentJSON)]
 		resource.allContents.filter(Parameters).forEach[findVirtualParameters()]
 		resource.allContents.filter(Intent).forEach[findVirtualIntents() generateIntentJSON(intents) ]
 		resource.allContents.filter(EntityType).forEach[generateEntityTypeJSON(entityTypes)]
@@ -104,22 +101,6 @@ class Lasr_langGenerator extends AbstractGenerator {
 		}
 		for (entityType : entityTypes) {
 			httpRequest.createEntityTypes(entityType, gson)
-		}
-	}
-
-	def generateAgentJSON(Agent agent, JsonObject obj) {
-		var key = new String()
-		var value = new Object()
-
-		for (m : agent.values) {
-			key = m.aa.toString()
-			if (m.value.bool === null) {
-				value = m.value.v.name
-				obj.addProperty(key, value.toString)
-			} else {
-				value = Boolean.parseBoolean(m.value.bool)
-				obj.addProperty(key, value.toString)
-			}
 		}
 	}
 

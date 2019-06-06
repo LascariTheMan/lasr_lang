@@ -6,9 +6,9 @@ Model:
 	VirtualParameters+=VirtualParameters* virtualIntents+=VirtualIntent* intents+=Intent* entitytypes+=EntityType* 
 ;
 
-// Intents----------------------------------------------------------------------------------------------------------------
+// Intents---------------------
 Intent:
-	{Intent} 'Intent' name=ID (':' vi+=[VirtualIntent](',' vi+=[VirtualIntent]))? '{'values+=IntentValue*'}'
+	{Intent} 'intent' name=ID (':' vi+=[VirtualIntent](',' vi+=[VirtualIntent]))? '{'values+=IntentValue*'}'
 ;
 
 IntentValue:
@@ -59,19 +59,19 @@ Messages:
 	{Messages} v='messages' '{' messages+=Words(',' messages+=Words)* '}'
 ;
 
-// VirtualIntent -----------------------------------------------------------------------------------------------------------------
+// VirtualIntent ---------------------
 VirtualIntent:
 	'virtual' 'intent' name = ID '{' virtualValues+=List* '}'
 ;
 
-// VirtualParameters
+// VirtualParameters -------------------
 VirtualParameters:
 	'virtual' 'parameters' name = ID '{' virtualParameters+=Parameter* '}'
 ;
 
-// EntityType ---------------------------------------------------------------------------------------------------------------------
+// EntityType -----------------------
 EntityType:
-	'EntityType' name=ID '{' a='autoExpansion' ':' exp=('true'|'false') entities+=Entities+ '}'	
+	'entityType' name=ID '{' a='autoExpansion' ':' exp=('true'|'false') entities+=Entities+ '}'	
 ;
 
 Entities:
